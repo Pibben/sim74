@@ -47,10 +47,10 @@ class Header(Part):
    matchingNames = ["PINHD-1X4"]
    def __init__(self, name):
       Part.__init__(self, name)
-      self.pins = {'1': Pin(INPUT),
-                   '2': Pin(INPUT),
-                   '3': Pin(INPUT),
-                   '4': Pin(INPUT)}
+      self.pins = {'1': Pin(Pin.INPUT),
+                   '2': Pin(Pin.INPUT),
+                   '3': Pin(Pin.INPUT),
+                   '4': Pin(Pin.INPUT)}
 
 class Part7400(Part):
    def __init__(self, name):
@@ -61,28 +61,28 @@ class P74181(Part7400):
    
    def __init__(self, name):
       Part7400.__init__(self, name)
-      self.pins = {'A0': Pin(INPUT),
-                   'A1': Pin(INPUT),
-                   'A2': Pin(INPUT),
-                   'A3': Pin(INPUT),
-                   'B0': Pin(INPUT),
-                   'B1': Pin(INPUT),
-                   'B2': Pin(INPUT),
-                   'B3': Pin(INPUT),
-                   'F0': Pin(OUTPUT),
-                   'F1': Pin(OUTPUT),
-                   'F2': Pin(OUTPUT),
-                   'F3': Pin(OUTPUT),
-                   'S0': Pin(INPUT),
-                   'S1': Pin(INPUT),
-                   'S2': Pin(INPUT),
-                   'S3': Pin(INPUT),
-                   'CN': Pin(INPUT),
-                   'CN+4': Pin(OUTPUT),
-                   'M': Pin(INPUT),
-                   'A=B': Pin(OUTPUT),
-                   'G': Pin(OUTPUT),
-                   'P': Pin(OUTPUT)}
+      self.pins = {'A0': Pin(Pin.INPUT),
+                   'A1': Pin(Pin.INPUT),
+                   'A2': Pin(Pin.INPUT),
+                   'A3': Pin(Pin.INPUT),
+                   'B0': Pin(Pin.INPUT),
+                   'B1': Pin(Pin.INPUT),
+                   'B2': Pin(Pin.INPUT),
+                   'B3': Pin(Pin.INPUT),
+                   'F0': Pin(Pin.OUTPUT),
+                   'F1': Pin(Pin.OUTPUT),
+                   'F2': Pin(Pin.OUTPUT),
+                   'F3': Pin(Pin.OUTPUT),
+                   'S0': Pin(Pin.INPUT),
+                   'S1': Pin(Pin.INPUT),
+                   'S2': Pin(Pin.INPUT),
+                   'S3': Pin(Pin.INPUT),
+                   'CN': Pin(Pin.INPUT),
+                   'CN+4': Pin(Pin.OUTPUT),
+                   'M': Pin(Pin.INPUT),
+                   'A=B': Pin(Pin.OUTPUT),
+                   'G': Pin(Pin.OUTPUT),
+                   'P': Pin(Pin.OUTPUT)}
 
    def update(self):
       a = bitsToInt(*[pins[name].getValue() for name in ['A0', 'A1', 'A2', 'A3']])
@@ -128,4 +128,4 @@ def parseXml(filename):
       print(part)
    
 if __name__ == '__main__':
-   pass
+   parseXml('/home/per/eagle/test.sch')
