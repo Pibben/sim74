@@ -18,11 +18,27 @@ class Net(object):
    
    def __repr__(self):
       pins = [str("%s" % k) for k in self.terminals]
-      return "%s: %s" % (self.name, pins)
+      return "%s (%d/%d): %s" % (self.name, self.numInputs(), self.numOutputs(), pins)
    
    def addPin(self, pin):
       self.terminals.append(pin)
       pin.setNet(self)
+      
+   def numInputs(self):
+      count = 0
+      for pin in self.terminals:
+         if pin.direction == Pin.INPUT:
+            count += 1
+            
+      return count
+   
+   def numOutputs(self):
+      count = 0
+      for pin in self.terminals:
+         if pin.direction == Pin.OUTPUT:
+            count += 1
+            
+      return count
 
 class Pin(object):
    INPUT = 0
