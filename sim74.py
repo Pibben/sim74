@@ -17,23 +17,24 @@ class Net(object):
       pass
    
    def __repr__(self):
-      pins = [str("%s:" % k) for k in self.terminals]
+      pins = [str("%s" % k) for k in self.terminals]
       return "%s: %s" % (self.name, pins)
    
    def addPin(self, pin):
       self.terminals.append(pin)
-      pin.addNet(self)
+      pin.setNet(self)
 
 class Pin(object):
    INPUT = 0
    OUTPUT = 1
    TRISTATE = 2
    
-   def __init__(self, part, direction):
+   def __init__(self, part, name, direction):
       self.direction = direction
       self.part = part
       self.value = 0
       self.net = None
+      self.name = name
       
    def update(self):
       pass
@@ -42,7 +43,7 @@ class Pin(object):
       return self.value
    
    def __repr__(self):
-      return "%s: %s" % (self.part.name, "pin xx")
+      return "%s: %s" % (self.part.name, self.name)
    
    def setNet(self, net):
       self.net = net
@@ -55,6 +56,9 @@ class Part(object):
    def getPin(self, name):
       return self.pins[name]
    
+   def addPin(self, name, direction):
+      self.pins.update({name: Pin(self, name, direction)})
+   
    def __repr__(self):
       pins = [str("%s: %s" % (k, repr(v))) for k,v in self.pins.items()]
       return "Part %s \n%s" % (self.name, '\n'.join(pins))
@@ -63,10 +67,10 @@ class Header(Part):
    matchingNames = ["PINHD-1X4"]
    def __init__(self, name):
       Part.__init__(self, name)
-      self.pins = {'1': Pin(self, Pin.INPUT),
-                   '2': Pin(self, Pin.INPUT),
-                   '3': Pin(self, Pin.INPUT),
-                   '4': Pin(self, Pin.INPUT)}
+      self.addPin('1', Pin.INPUT)
+      self.addPin('2', Pin.INPUT)
+      self.addPin('3', Pin.INPUT)
+      self.addPin('4', Pin.INPUT)
 
 class Part7400(Part):
    def __init__(self, name):
@@ -77,28 +81,33 @@ class P74181(Part7400):
    
    def __init__(self, name):
       Part7400.__init__(self, name)
-      self.pins = {'A0': Pin(self, Pin.INPUT),
-                   'A1': Pin(self, Pin.INPUT),
-                   'A2': Pin(self, Pin.INPUT),
-                   'A3': Pin(self, Pin.INPUT),
-                   'B0': Pin(self, Pin.INPUT),
-                   'B1': Pin(self, Pin.INPUT),
-                   'B2': Pin(self, Pin.INPUT),
-                   'B3': Pin(self, Pin.INPUT),
-                   'F0': Pin(self, Pin.OUTPUT),
-                   'F1': Pin(self, Pin.OUTPUT),
-                   'F2': Pin(self, Pin.OUTPUT),
-                   'F3': Pin(self, Pin.OUTPUT),
-                   'S0': Pin(self, Pin.INPUT),
-                   'S1': Pin(self, Pin.INPUT),
-                   'S2': Pin(self, Pin.INPUT),
-                   'S3': Pin(self, Pin.INPUT),
-                   'CN': Pin(self, Pin.INPUT),
-                   'CN+4': Pin(self, Pin.OUTPUT),
-                   'M': Pin(self, Pin.INPUT),
-                   'A=B': Pin(self, Pin.OUTPUT),
-                   'G': Pin(self, Pin.OUTPUT),
-                   'P': Pin(self, Pin.OUTPUT)}
+
+      self.addPin('A0', Pin.INPUT)
+      self.addPin('A1', Pin.INPUT)
+      self.addPin('A2', Pin.INPUT)
+      self.addPin('A3', Pin.INPUT)
+
+      self.addPin('B0', Pin.INPUT)
+      self.addPin('B1', Pin.INPUT)
+      self.addPin('B2', Pin.INPUT)
+      self.addPin('B3', Pin.INPUT)
+      
+      self.addPin('F0', Pin.OUTPUT)
+      self.addPin('F1', Pin.OUTPUT)
+      self.addPin('F2', Pin.OUTPUT)
+      self.addPin('F3', Pin.OUTPUT)
+
+      self.addPin('S0', Pin.INPUT)
+      self.addPin('S1', Pin.INPUT)
+      self.addPin('S2', Pin.INPUT)
+      self.addPin('S3', Pin.INPUT)
+      
+      self.addPin('CN', Pin.INPUT)
+      self.addPin('CN+4', Pin.OUTPUT)
+      self.addPin('M', Pin.INPUT)
+      self.addPin('A=B', Pin.OUTPUT)
+      self.addPin('G', Pin.OUTPUT)
+      self.addPin('P', Pin.OUTPUT)
 
    def update(self):
       a = bitsToInt(*[pins[name].getValue() for name in ['A0', 'A1', 'A2', 'A3']])
