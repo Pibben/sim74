@@ -128,9 +128,13 @@ class Header(Part):
       self.addPin('6', Pin.INPUT)
       self.addPin('7', Pin.INPUT)
       self.addPin('8', Pin.INPUT)
+      self.width = 4
       
    def update(self):
       pass
+   
+   def setWidth(self, width):
+      self.width = width
       
    def setDirection(self, direction):
       self.direction = direction
@@ -138,14 +142,15 @@ class Header(Part):
          p.setDirection(direction)
          
    def setNumber(self, number):
-      bits = intToBits(number, 4)
+      bits = intToBits(number, self.width)
       #print(bits)
       
-      for i in range(4):
-         self.pins[str(i+1)].setValue(bits[3-i])
+      for i in range(self.width):
+         self.pins[str(i+1)].setValue(bits[self.width-1-i])
 
    def getNumber(self):
-      bits = [self.pins[str(i+1)].getValue() for i in range(3,-1,-1)]
+      bits = [self.pins[str(i+1)].getValue() for i in range(self.width-1,-1,-1)]
+      #print(bits)
       retval = bitsToInt(*bits)
       #print("%s: %d" % (self.name, retval))
       return retval
@@ -255,9 +260,14 @@ if __name__ == '__main__':
    parts, nets = parseXml('/home/per/eagle/test.sch')
 
    parts['IN_A'].setDirection(Pin.OUTPUT)
+   parts['IN_A'].setWidth(8)
    parts['IN_B'].setDirection(Pin.OUTPUT)
+   parts['IN_B'].setWidth(8)
+   
    parts['IN_S'].setDirection(Pin.OUTPUT)
    parts['IN_S'].setNumber(0)
+   
+   parts['OUT_F'].setWidth(8)
 
    parts['IN_A'].setNumber(3)
    parts['IN_B'].setNumber(2)
