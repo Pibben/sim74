@@ -6,7 +6,19 @@ def bitsToInt(*bits):
    for i in range(len(bits)):
       val = (val << 1) | bits[i]
       
+   #print(str(bits) + " -> %d" % val)
+      
    return val
+
+def intToBits(integer, num):
+   retval = []
+   for i in range(num):
+      retval.append((integer >> (num-i-1)) & 1)
+      
+   #print("%d -> " % integer + str(retval))
+      
+   return retval
+
 
 class Net(object):
    def __init__(self, name):
@@ -39,6 +51,14 @@ class Net(object):
             count += 1
             
       return count
+   
+   def getValue(self):
+      for p in self.terminals:
+         if p.direction == Pin.OUTPUT:
+            p.update()
+            return p.getValue()
+      print("Net %s has no output pins!" % self.name)
+      return 0
 
 class Pin(object):
    INPUT = 0
@@ -52,11 +72,28 @@ class Pin(object):
       self.net = None
       self.name = name
       
+   def setDirection(self, direction):
+      self.direction = direction
+      
    def update(self):
       pass
    
    def getValue(self):
-      return self.value
+      if self.direction == Pin.OUTPUT:
+         self.part.update()
+         #print("%s:%s: %d" % (self.part.name, self.name, self.value))
+         return self.value
+      elif self.direction == Pin.INPUT:
+         if(self.net == None):
+            return 0
+         else:
+            return self.net.getValue()
+      else:
+         print("Get value on tristate pin")
+         return None
+      
+   def setValue(self, value):
+      self.value = value
    
    def __repr__(self):
       return "%s: %s" % (self.part.name, self.name)
@@ -91,6 +128,27 @@ class Header(Part):
       self.addPin('6', Pin.INPUT)
       self.addPin('7', Pin.INPUT)
       self.addPin('8', Pin.INPUT)
+      
+   def update(self):
+      pass
+      
+   def setDirection(self, direction):
+      self.direction = direction
+      for p in self.pins.values():
+         p.setDirection(direction)
+         
+   def setNumber(self, number):
+      bits = intToBits(number, 4)
+      #print(bits)
+      
+      for i in range(4):
+         self.pins[str(i+1)].setValue(bits[3-i])
+
+   def getNumber(self):
+      bits = [self.pins[str(i+1)].getValue() for i in range(3,-1,-1)]
+      retval = bitsToInt(*bits)
+      #print("%s: %d" % (self.name, retval))
+      return retval
 
 class Part7400(Part):
    def __init__(self, name):
@@ -130,14 +188,26 @@ class P74181(Part7400):
       self.addPin('P', Pin.OUTPUT)
 
    def update(self):
-      a = bitsToInt(*[pins[name].getValue() for name in ['A0', 'A1', 'A2', 'A3']])
-      b = bitsToInt(*[pins[name].getValue() for name in ['B0', 'B1', 'B2', 'B3']])
-      s = bitsToInt(*[pins[name].getValue() for name in ['S0', 'S1', 'S2', 'S3']])
-      c = pins['CN'].getValue()
-      m = pins['CN'].getValue()
+      a = bitsToInt(*[self.pins[name].getValue() for name in ['A3', 'A2', 'A1', 'A0']])
+      b = bitsToInt(*[self.pins[name].getValue() for name in ['B3', 'B2', 'B1', 'B0']])
+      s = bitsToInt(*[self.pins[name].getValue() for name in ['S3', 'S2', 'S1', 'S0']])
+      c = self.pins['CN'].getValue()
+      m = self.pins['M'].getValue()
       
+      f = a + b
       
+      bits = intToBits(f, 4)
 
+      self.pins['F0'].setValue(bits[3])
+      self.pins['F1'].setValue(bits[2])
+      self.pins['F2'].setValue(bits[1])
+      self.pins['F3'].setValue(bits[0])
+      
+      #print("%s: %d + %d = %d" % (self.name, a, b, f))
+      
+   def getDAG(self, _):
+      return [pins[name] for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']]
+      
       
 class PartFactory(object):
    def createPart(self, device, name):
@@ -169,13 +239,32 @@ def parseXml(filename):
       for segmentNode in netNode:
          for pinrefOrWire in segmentNode:
             if pinrefOrWire.tag == 'pinref':
-               net.addPin(parts[pinrefOrWire.attrib['part']].getPin(pinrefOrWire.attrib['pin']))
+               pin = parts[pinrefOrWire.attrib['part']].getPin(pinrefOrWire.attrib['pin'])
+               net.addPin(pin)
+               pin.setNet(net)
          
-   for net in nets:
-      print(net)
+   #for net in nets:
+   #   print(net)
          
    #for part in parts.values():
    #   print(part)
    
+   return parts, nets
+   
 if __name__ == '__main__':
-   parseXml('/home/per/eagle/test.sch')
+   parts, nets = parseXml('/home/per/eagle/test.sch')
+
+   parts['IN_A'].setDirection(Pin.OUTPUT)
+   parts['IN_B'].setDirection(Pin.OUTPUT)
+   parts['IN_S'].setDirection(Pin.OUTPUT)
+   parts['IN_S'].setNumber(0)
+
+   parts['IN_A'].setNumber(3)
+   parts['IN_B'].setNumber(2)
+   
+   print(parts['OUT_F'].getNumber())
+   
+   parts['IN_A'].setNumber(4)
+   parts['IN_B'].setNumber(5)
+   
+   print(parts['OUT_F'].getNumber())
