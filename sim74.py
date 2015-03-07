@@ -199,16 +199,17 @@ class P74181(Part7400):
       c = self.pins['CN'].getValue()
       m = self.pins['M'].getValue()
       
-      f = a + b
+      f = a + b + c
       
-      bits = intToBits(f, 4)
+      bits = intToBits(f, 5)
 
-      self.pins['F0'].setValue(bits[3])
-      self.pins['F1'].setValue(bits[2])
-      self.pins['F2'].setValue(bits[1])
-      self.pins['F3'].setValue(bits[0])
+      self.pins['F0'].setValue(bits[4])
+      self.pins['F1'].setValue(bits[3])
+      self.pins['F2'].setValue(bits[2])
+      self.pins['F3'].setValue(bits[1])
+      self.pins['CN+4'].setValue(bits[0])
       
-      #print("%s: %d + %d = %d" % (self.name, a, b, f))
+      #print("%s: %d + %d = %d (C:%d)" % (self.name, a, b, f&15, f>>4))
       
    def getDAG(self, _):
       return [pins[name] for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']]
@@ -274,7 +275,7 @@ if __name__ == '__main__':
    
    print(parts['OUT_F'].getNumber())
    
-   parts['IN_A'].setNumber(4)
-   parts['IN_B'].setNumber(5)
+   parts['IN_A'].setNumber(86)
+   parts['IN_B'].setNumber(47)
    
    print(parts['OUT_F'].getNumber())
