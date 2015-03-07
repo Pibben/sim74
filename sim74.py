@@ -25,9 +25,6 @@ class Net(object):
       self.terminals = []
       self.name = name
       
-   def getValue(self):
-      pass
-   
    def __repr__(self):
       pins = [str("%s" % k) for k in self.terminals]
       return "%s (%d/%d): %s" % (self.name, self.numInputs(), self.numOutputs(), pins)
@@ -55,7 +52,6 @@ class Net(object):
    def getValue(self):
       for p in self.terminals:
          if p.direction == Pin.OUTPUT:
-            p.update()
             return p.getValue()
       print("Net %s has no output pins!" % self.name)
       return 0
@@ -74,14 +70,11 @@ class Pin(object):
       
    def setDirection(self, direction):
       self.direction = direction
-      
-   def update(self):
-      pass
    
    def getValue(self):
       if self.direction == Pin.OUTPUT:
          self.part.update()
-         #print("%s:%s: %d" % (self.part.name, self.name, self.value))
+         
          return self.value
       elif self.direction == Pin.INPUT:
          if(self.net == None):
@@ -128,7 +121,7 @@ class Header(Part):
       self.addPin('6', Pin.INPUT)
       self.addPin('7', Pin.INPUT)
       self.addPin('8', Pin.INPUT)
-      self.width = 4
+      self.width = 1
       
    def update(self):
       pass
@@ -143,17 +136,16 @@ class Header(Part):
          
    def setNumber(self, number):
       bits = intToBits(number, self.width)
-      #print(bits)
+      bits.reverse()
       
       for i in range(self.width):
-         self.pins[str(i+1)].setValue(bits[self.width-1-i])
+         self.pins[str(i+1)].setValue(bits[i])
 
    def getNumber(self):
-      bits = [self.pins[str(i+1)].getValue() for i in range(self.width-1,-1,-1)]
-      #print(bits)
-      retval = bitsToInt(*bits)
-      #print("%s: %d" % (self.name, retval))
-      return retval
+      bits = [self.pins[str(i+1)].getValue() for i in range(self.width)]
+      bits.reverse()
+
+      return bitsToInt(*bits)
 
 class Part7400(Part):
    def __init__(self, name):
@@ -209,8 +201,6 @@ class P74181(Part7400):
       self.pins['F3'].setValue(bits[1])
       self.pins['CN+4'].setValue(bits[0])
       
-      #print("%s: %d + %d = %d (C:%d)" % (self.name, a, b, f&15, f>>4))
-      
    def getDAG(self, _):
       return [pins[name] for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']]
       
@@ -247,13 +237,6 @@ def parseXml(filename):
             if pinrefOrWire.tag == 'pinref':
                pin = parts[pinrefOrWire.attrib['part']].getPin(pinrefOrWire.attrib['pin'])
                net.addPin(pin)
-               pin.setNet(net)
-         
-   #for net in nets:
-   #   print(net)
-         
-   #for part in parts.values():
-   #   print(part)
    
    return parts, nets
    
