@@ -80,13 +80,17 @@ class Part(object):
       return "Part %s \n%s" % (self.name, '\n'.join(pins))
    
 class Header(Part):
-   matchingNames = ["PINHD-1X4"]
+   matchingNames = ["PINHD-1X4", "PINHD-1X8"]
    def __init__(self, name):
       Part.__init__(self, name)
       self.addPin('1', Pin.INPUT)
       self.addPin('2', Pin.INPUT)
       self.addPin('3', Pin.INPUT)
       self.addPin('4', Pin.INPUT)
+      self.addPin('5', Pin.INPUT)
+      self.addPin('6', Pin.INPUT)
+      self.addPin('7', Pin.INPUT)
+      self.addPin('8', Pin.INPUT)
 
 class Part7400(Part):
    def __init__(self, name):
