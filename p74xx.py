@@ -40,21 +40,21 @@ class P74181(Part7400):
       self.addPin('P', Pin.OUTPUT)
 
    def updateImpl(self):
-      a = bitsToInt(*[self.pins[name].getValue() for name in ['A3', 'A2', 'A1', 'A0']])
-      b = bitsToInt(*[self.pins[name].getValue() for name in ['B3', 'B2', 'B1', 'B0']])
-      s = bitsToInt(*[self.pins[name].getValue() for name in ['S3', 'S2', 'S1', 'S0']])
-      c = self.pins['CN'].getValue()
-      m = self.pins['M'].getValue()
+      a = bitsToInt(*[self.getPin(name).getValue() for name in ['A3', 'A2', 'A1', 'A0']])
+      b = bitsToInt(*[self.getPin(name).getValue() for name in ['B3', 'B2', 'B1', 'B0']])
+      s = bitsToInt(*[self.getPin(name).getValue() for name in ['S3', 'S2', 'S1', 'S0']])
+      c = self.getPin('CN').getValue()
+      m = self.getPin('M').getValue()
       
       f = a + b + c
       
       bits = intToBits(f, 5)
 
-      self.pins['F0'].setValue(bits[4])
-      self.pins['F1'].setValue(bits[3])
-      self.pins['F2'].setValue(bits[2])
-      self.pins['F3'].setValue(bits[1])
-      self.pins['CN+4'].setValue(bits[0])
+      self.getPin('F0').setValue(bits[4])
+      self.getPin('F1').setValue(bits[3])
+      self.getPin('F2').setValue(bits[2])
+      self.getPin('F3').setValue(bits[1])
+      self.getPin('CN+4').setValue(bits[0])
       
       return False
       

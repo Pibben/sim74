@@ -43,11 +43,12 @@ class Pin(object):
    OUTPUT = 1
    TRISTATE = 2
    
-   def __init__(self, part, name, direction):
+   def __init__(self, part, gate, name, direction):
       self.direction = direction
       self.part = part
       self.value = 0
       self.net = None
+      self.gate = gate
       self.name = name
       
    def setDirection(self, direction):
@@ -78,11 +79,17 @@ class Part(object):
       self.pins = {}
       self.dirty = True
       
+   def getPinByGate(self, gate, name):
+      return self.pins[(gate, name)]
+      
    def getPin(self, name):
-      return self.pins[name]
+      return self.getPinByGate('A', name)
    
+   def addGateAndPin(self, gate, name, direction):
+      self.pins.update({(gate, name): Pin(self, gate, name, direction)})
+      
    def addPin(self, name, direction):
-      self.pins.update({name: Pin(self, name, direction)})
+      self.addGateAndPin('A', name, direction)
       
    def update(self):
       if self.dirty:

@@ -31,10 +31,10 @@ class Header(Part):
       bits.reverse()
       
       for i in range(self.width):
-         self.pins[str(i+1)].setValue(bits[i])
+         self.getPin(str(i+1)).setValue(bits[i])
 
    def getNumber(self):
-      bits = [self.pins[str(i+1)].getValue() for i in range(self.width)]
+      bits = [self.getPin(str(i+1)).getValue() for i in range(self.width)]
       bits.reverse()
 
       return bitsToInt(*bits)
