@@ -89,18 +89,22 @@ class Part(object):
       self.name = name
       self.pins = {}
       self.dirty = True
+      self.defaultGate = 'A'
+      
+   def setDefaultGate(self, gate):
+      self.defaultGate = gate
       
    def getPinByGate(self, gate, name):
       return self.pins[(gate, name)]
       
    def getPin(self, name):
-      return self.getPinByGate('A', name)
+      return self.getPinByGate(self.defaultGate, name)
    
    def addGateAndPin(self, gate, name, direction):
       self.pins.update({(gate, name): Pin(self, gate, name, direction)})
       
    def addPin(self, name, direction):
-      self.addGateAndPin('A', name, direction)
+      self.addGateAndPin(self.defaultGate, name, direction)
       
    def update(self):
       if self.dirty:
