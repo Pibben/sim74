@@ -39,3 +39,6 @@ class Header(Part):
 
       return bitsToInt(*bits)
    
+   def getDAG(self, g, n):
+      return set()
+   

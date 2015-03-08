@@ -21,6 +21,9 @@ class P7404(Part7400):
          self.getPinByGate(gate, 'O').setValue(1 - self.getPinByGate(gate, 'I').getValue())
       
       return True
+   
+   def getDAG(self, gate, _):
+      return {self.getPinByGate(gate, 'O')}
       
 class P74181(Part7400):
    matchingNames = ["74*181"]
@@ -74,5 +77,5 @@ class P74181(Part7400):
       
       return False
       
-   def getDAG(self, _):
-      return [pins[name] for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']]
+   def getDAG(self, g, n):
+      return set([self.getPin(name) for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']])

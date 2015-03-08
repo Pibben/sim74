@@ -1,5 +1,7 @@
 
 from parsexml import parseXml
+from toposort import toposort, toposort_flatten
+
 from core import Pin
    
 if __name__ == '__main__':
@@ -17,20 +19,31 @@ if __name__ == '__main__':
 
    parts['IN_A'].setNumber(3)
    parts['IN_B'].setNumber(2)
-   
-   partOrder = ['IN_A', 'IN_B', 'IN_S', 'ALU1', 'ALU2', 'IC1', 'IC1', 'OUT_F']
 
-   for p in partOrder:
-      parts[p].update()
+   totalDAGs = {}
+   
+   for p in parts.values():
+      totalDAGs.update(p.getDAGs())
+      
+   for n in nets:
+      totalDAGs.update(n.getDAG())
+
+   sorted = toposort_flatten(totalDAGs)
+   sorted.reverse()
+   
+   for s in sorted:
+      if s.direction == Pin.OUTPUT and s.net:
+         s.part.update()
+
       
    print(parts['OUT_F'].getNumber())
    
    parts['IN_A'].setNumber(86)
    parts['IN_B'].setNumber(47)
    
-   for p in partOrder:
-      parts[p].update()
-      
+   for s in sorted:
+      if s.direction == Pin.OUTPUT and s.net:
+         s.part.update()
+         
+         
    print(parts['OUT_F'].getNumber())
-   
-      

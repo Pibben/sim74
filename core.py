@@ -36,8 +36,19 @@ class Net(object):
          if p.direction == Pin.INPUT:
             return p.setValue(value)
       print("Net %s has no input pins!" % self.name)
+      
+   def getDAG(self):
+      dag = set()
+      key = None
+      assert self.numOutputs() == 1
+      for p in self.terminals:
+         if p.direction == Pin.OUTPUT:
+            key = p
+         if p.direction == Pin.INPUT:
+            dag.add(p)
+      
+      return {key: dag}
      
-
 class Pin(object):
    INPUT = 0
    OUTPUT = 1
@@ -68,7 +79,7 @@ class Pin(object):
          print("Set value on tristate pin")
    
    def __repr__(self):
-      return "%s: %s" % (self.part.name, self.name)
+      return "%s: %s-%s" % (self.part.name, self.gate, self.name)
 
    def setNet(self, net):
       self.net = net
@@ -98,6 +109,13 @@ class Part(object):
          
    def setDirty(self):
       self.dirty = True
+      
+   def getDAGs(self):
+      dags = {}
+      for p in self.pins.values():
+         if p.direction == Pin.INPUT:
+            dags.update({p: self.getDAG(p.gate, p.name)})
+      return dags
    
    def __repr__(self):
       pins = [str("%s: %s" % (k, repr(v))) for k,v in self.pins.items()]
