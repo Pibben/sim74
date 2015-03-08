@@ -25,6 +25,28 @@ class P7404(Part7400):
    def getDAG(self, gate, _):
       return {self.getPinByGate(gate, 'O')}
    
+class P7408(Part7400):
+   matchingNames = ["74*08"]
+
+   def __init__(self, name):
+      Part7400.__init__(self, name)
+      
+      for gate in ('/1', '/2', '/3', '/4',):
+         self.addGateAndPin(gate, 'A', Pin.INPUT)
+         self.addGateAndPin(gate, 'B', Pin.INPUT)
+         self.addGateAndPin(gate, 'Y', Pin.OUTPUT)
+      
+   def updateImpl(self):
+      for gate in ('/1', '/2', '/3', '/4'):
+         a = bool(self.getPinByGate(gate, 'A').getValue())
+         b = bool(self.getPinByGate(gate, 'B').getValue())
+         self.getPinByGate(gate, 'Y').setValue(int(a & b))
+      
+      return True
+   
+   def getDAG(self, gate, _):
+      return {self.getPinByGate(gate, 'Y')}
+   
 class P74161(Part7400):
    matchingNames = ["74*161"]
    
