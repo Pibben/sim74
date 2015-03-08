@@ -11,15 +11,13 @@ class System(object):
       self.inputs = []
       self.outputs = []
       
-   def setOutput(self, pinName, width):
+   def setOutput(self, pinName):
       self.parts[pinName].setDirection(Pin.INPUT)
-      self.parts[pinName].setWidth(width)
       self.outputs.append(self.parts[pinName])
       
       
-   def setInput(self, pinName, width):
+   def setInput(self, pinName):
       self.parts[pinName].setDirection(Pin.OUTPUT)
-      self.parts[pinName].setWidth(width)
       self.inputs.append(self.parts[pinName])
    
    def run(self, *args):

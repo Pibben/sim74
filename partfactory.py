@@ -9,7 +9,7 @@ class PartFactory(object):
       if device in P7404.matchingNames:
          return P7404(name)
       if device in Header.matchingNames:
-         return Header(name)
+         return Header(name, device)
       else:
          print("Unknown part %s %s" % (device, name))
          assert False
