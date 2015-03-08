@@ -17,6 +17,8 @@ def testMemory():
    
    s.setInput('CLK')
    s.setOutput('OUT')
+   s.setHigh('V4', 'ENT')
+   s.setHigh('V4', 'ENP')
    
    s.run(1)
    s.run(1)

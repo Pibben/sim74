@@ -19,6 +19,9 @@ class System(object):
    def setInput(self, pinName):
       self.parts[pinName].setDirection(Pin.OUTPUT)
       self.inputs.append(self.parts[pinName])
+      
+   def setHigh(self, partName, pinName):
+      self.parts[partName].getPin(pinName).setDefaultValue(1)
    
    def run(self, *args):
       assert len(args) == len(self.inputs)
