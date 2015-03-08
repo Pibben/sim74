@@ -31,7 +31,9 @@ class P74161(Part7400):
    def __init__(self, name):
       Part7400.__init__(self, name)
       self.gate = '1'
+      self.setDefaultGate('1')
       self.count = 0
+      self.rco = 0
       
       self.addGateAndPin(self.gate, 'QA', Pin.OUTPUT)
       self.addGateAndPin(self.gate, 'QB', Pin.OUTPUT)
@@ -51,16 +53,30 @@ class P74161(Part7400):
       
    def updateImpl(self):
       enable = self.getPinByGate(self.gate, 'ENP').getValue()
+      positiveEdge = self.getPinByGate(self.gate, 'CLK').isPositiveEdge()
+      negativeEdge = self.getPinByGate(self.gate, 'CLK').isNegativeEdge()
       
-      if(enable == 1):
+      if enable == 1 and positiveEdge:
          self.count = self.count + 1
          
-      bits = intToBits(self.count, 5)
-      self.getPinByGate(self.gate, 'QA').setValue(bits[4])
-      self.getPinByGate(self.gate, 'QB').setValue(bits[3])
-      self.getPinByGate(self.gate, 'QC').setValue(bits[2])
-      self.getPinByGate(self.gate, 'QD').setValue(bits[1])
-      self.getPinByGate(self.gate, 'RCO').setValue(bits[0])
+      #print("%s: %d" % (self.name, self.count))
+         
+      if self.count == 16:
+         self.count = 0
+         
+      bits = intToBits(self.count, 4)
+      self.getPinByGate(self.gate, 'QA').setValue(bits[3])
+      self.getPinByGate(self.gate, 'QB').setValue(bits[2])
+      self.getPinByGate(self.gate, 'QC').setValue(bits[1])
+      self.getPinByGate(self.gate, 'QD').setValue(bits[0])
+      self.getPinByGate(self.gate, 'RCO').setValue(self.rco)
+      
+      if self.count == 15:
+         self.rco = 1
+      else:
+         self.rco = 0
+      
+      self.getPinByGate(self.gate, 'CLK').resetEdge() #TODO
       
       return False
       

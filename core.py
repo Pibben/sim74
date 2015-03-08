@@ -61,22 +61,45 @@ class Pin(object):
       self.net = None
       self.gate = gate
       self.name = name
+      self.positiveEdge = False
+      self.negativeEdge = False
+      
+   def setDefaultValue(self, value):
+      self.value = value
       
    def setDirection(self, direction):
       self.direction = direction
    
    def getValue(self):
       return self.value
+   
+   def isPositiveEdge(self):
+      return self.positiveEdge
+
+   def isNegativeEdge(self):
+      return self.negativeEdge
+   
+   def resetEdge(self):
+      self.positiveEdge = False
+      self.negativeEdge = False
       
    def setValue(self, value):
-      self.value = value
       if self.direction == Pin.INPUT:
          self.part.setDirty()
+         self.positiveEdge = False
+         self.negativeEdge = False
+         if self.value == 0 and value == 1:
+            self.positiveEdge = True
+         elif self.value == 1 and value == 0:
+            self.negativeEdge = True
+
       elif self.direction == Pin.OUTPUT:
          if(self.net):
             self.net.setValue(value)
       else:
          print("Set value on tristate pin")
+         
+      self.value = value
    
    def __repr__(self):
       return "%s: %s-%s" % (self.part.name, self.gate, self.name)
