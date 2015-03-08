@@ -34,8 +34,8 @@ class Net(object):
       assert self.numOutputs() == 1
       for p in self.terminals:
          if p.direction == Pin.INPUT:
-            return p.setValue(value)
-      print("Net %s has no input pins!" % self.name)
+            p.setValue(value)
+      #print("Net %s has no input pins!" % self.name)
       
    def getDAG(self):
       dag = set()
