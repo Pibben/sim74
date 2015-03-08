@@ -20,9 +20,10 @@ def testMemory():
    s.setHigh('V4', 'ENT')
    s.setHigh('V4', 'ENP')
    
-   s.run(1)
-   s.run(1)
+   for i in range(260):
+      s.run(1)
+      s.run(0)
    
 if __name__ == '__main__':
-   #testALU()
+   testALU()
    testMemory()
