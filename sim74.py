@@ -18,7 +18,7 @@ if __name__ == '__main__':
    parts['IN_A'].setNumber(3)
    parts['IN_B'].setNumber(2)
    
-   partOrder = ['IN_A', 'IN_B', 'IN_S', 'ALU1', 'ALU2', 'OUT_F']
+   partOrder = ['IN_A', 'IN_B', 'IN_S', 'ALU1', 'ALU2', 'IC1', 'IC1', 'OUT_F']
 
    for p in partOrder:
       parts[p].update()

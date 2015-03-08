@@ -6,6 +6,22 @@ class Part7400(Part):
    def __init__(self, name):
       Part.__init__(self, name)
       
+class P7404(Part7400):
+   matchingNames = ["74*04"]
+
+   def __init__(self, name):
+      Part7400.__init__(self, name)
+      
+      for gate in ('A', 'B', 'C', 'D', 'E', 'F'):
+         self.addGateAndPin(gate, 'I', Pin.INPUT)
+         self.addGateAndPin(gate, 'O', Pin.OUTPUT)
+      
+   def updateImpl(self):
+      for gate in ('A', 'B', 'C', 'D', 'E', 'F'):
+         self.getPinByGate(gate, 'O').setValue(1 - self.getPinByGate(gate, 'I').getValue())
+      
+      return True
+      
 class P74181(Part7400):
    matchingNames = ["74*181"]
    
