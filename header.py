@@ -16,7 +16,7 @@ class Header(Part):
       self.width = 1
       
    def updateImpl(self):
-      pass
+      return False
    
    def setWidth(self, width):
       self.width = width

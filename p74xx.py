@@ -56,5 +56,7 @@ class P74181(Part7400):
       self.pins['F3'].setValue(bits[1])
       self.pins['CN+4'].setValue(bits[0])
       
+      return False
+      
    def getDAG(self, _):
       return [pins[name] for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']]

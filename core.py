@@ -86,8 +86,8 @@ class Part(object):
       
    def update(self):
       if self.dirty:
-         self.updateImpl()
-         self.dirty = False
+         isDirty = self.updateImpl()
+         self.dirty = isDirty
          
    def setDirty(self):
       self.dirty = True
