@@ -30,12 +30,13 @@ class Net(object):
             
       return count
    
-   def getValue(self):
+   def setValue(self, value):
+      assert self.numOutputs() == 1
       for p in self.terminals:
-         if p.direction == Pin.OUTPUT:
-            return p.getValue()
-      print("Net %s has no output pins!" % self.name)
-      return 0
+         if p.direction == Pin.INPUT:
+            return p.setValue(value)
+      print("Net %s has no input pins!" % self.name)
+     
 
 class Pin(object):
    INPUT = 0
@@ -53,23 +54,17 @@ class Pin(object):
       self.direction = direction
    
    def getValue(self):
-      if self.direction == Pin.OUTPUT:
-         self.part.update()
-         
-         return self.value
-      elif self.direction == Pin.INPUT:
-         if(self.net == None):
-            return 0
-         else:
-            return self.net.getValue()
-      else:
-         print("Get value on tristate pin")
-         return None
+      return self.value
       
    def setValue(self, value):
       self.value = value
       if self.direction == Pin.INPUT:
          self.part.setDirty()
+      elif self.direction == Pin.OUTPUT:
+         if(self.net):
+            self.net.setValue(value)
+      else:
+         print("Set value on tristate pin")
    
    def __repr__(self):
       return "%s: %s" % (self.part.name, self.name)
@@ -90,8 +85,7 @@ class Part(object):
       self.pins.update({name: Pin(self, name, direction)})
       
    def update(self):
-      #if self.dirty:
-      if True: #TODO
+      if self.dirty:
          self.updateImpl()
          self.dirty = False
          

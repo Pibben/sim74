@@ -18,9 +18,19 @@ if __name__ == '__main__':
    parts['IN_A'].setNumber(3)
    parts['IN_B'].setNumber(2)
    
+   partOrder = ['IN_A', 'IN_B', 'IN_S', 'ALU1', 'ALU2', 'OUT_F']
+
+   for p in partOrder:
+      parts[p].update()
+      
    print(parts['OUT_F'].getNumber())
    
    parts['IN_A'].setNumber(86)
    parts['IN_B'].setNumber(47)
    
+   for p in partOrder:
+      parts[p].update()
+      
    print(parts['OUT_F'].getNumber())
+   
+      
