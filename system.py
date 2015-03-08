@@ -23,9 +23,6 @@ class System(object):
    def run(self, *args):
       assert len(args) == len(self.inputs)
       
-      for i in range(len(args)):
-         self.inputs[i].setNumber(args[i])
-         
       totalDAGs = {}
       
       for p in self.parts.values():
@@ -33,10 +30,12 @@ class System(object):
          
       for n in self.nets:
          totalDAGs.update(n.getDAG())
-
          
       order = toposort_flatten(totalDAGs)
       order.reverse()
+      
+      for i in range(len(args)):
+         self.inputs[i].setNumber(args[i])
          
       for s in order:
          if s.direction == Pin.OUTPUT and s.net:

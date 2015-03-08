@@ -12,5 +12,15 @@ def testALU():
    s.run(3, 2, 0)
    s.run(86, 47, 0)
    
+def testMemory():
+   s = System('/home/per/eagle/memory.sch')
+   
+   s.setInput('CLK')
+   s.setOutput('OUT')
+   
+   s.run(1)
+   s.run(1)
+   
 if __name__ == '__main__':
-   testALU()
+   #testALU()
+   testMemory()
