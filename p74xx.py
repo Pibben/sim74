@@ -39,7 +39,7 @@ class P74181(Part7400):
       self.addPin('G', Pin.OUTPUT)
       self.addPin('P', Pin.OUTPUT)
 
-   def update(self):
+   def updateImpl(self):
       a = bitsToInt(*[self.pins[name].getValue() for name in ['A3', 'A2', 'A1', 'A0']])
       b = bitsToInt(*[self.pins[name].getValue() for name in ['B3', 'B2', 'B1', 'B0']])
       s = bitsToInt(*[self.pins[name].getValue() for name in ['S3', 'S2', 'S1', 'S0']])

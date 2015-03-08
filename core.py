@@ -68,6 +68,8 @@ class Pin(object):
       
    def setValue(self, value):
       self.value = value
+      if self.direction == Pin.INPUT:
+         self.part.setDirty()
    
    def __repr__(self):
       return "%s: %s" % (self.part.name, self.name)
@@ -79,12 +81,22 @@ class Part(object):
    def __init__(self, name):
       self.name = name
       self.pins = {}
+      self.dirty = True
       
    def getPin(self, name):
       return self.pins[name]
    
    def addPin(self, name, direction):
       self.pins.update({name: Pin(self, name, direction)})
+      
+   def update(self):
+      #if self.dirty:
+      if True: #TODO
+         self.updateImpl()
+         self.dirty = False
+         
+   def setDirty(self):
+      self.dirty = True
    
    def __repr__(self):
       pins = [str("%s: %s" % (k, repr(v))) for k,v in self.pins.items()]

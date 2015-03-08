@@ -15,7 +15,7 @@ class Header(Part):
       self.addPin('8', Pin.INPUT)
       self.width = 1
       
-   def update(self):
+   def updateImpl(self):
       pass
    
    def setWidth(self, width):
