@@ -52,33 +52,31 @@ class P74161(Part7400):
    
    def __init__(self, name):
       Part7400.__init__(self, name)
-      self.gate = '1'
-      self.setDefaultGate('1')
       self.count = 0
       self.rco = 0
       
-      self.addGate(self.gate)
+      self.addDefaultGate('1')
       
-      self.addGateAndPin(self.gate, 'QA', Pin.OUTPUT)
-      self.addGateAndPin(self.gate, 'QB', Pin.OUTPUT)
-      self.addGateAndPin(self.gate, 'QC', Pin.OUTPUT)
-      self.addGateAndPin(self.gate, 'QD', Pin.OUTPUT)
+      self.addPin('QA', Pin.OUTPUT)
+      self.addPin('QB', Pin.OUTPUT)
+      self.addPin('QC', Pin.OUTPUT)
+      self.addPin('QD', Pin.OUTPUT)
       
-      self.addGateAndPin(self.gate, 'A', Pin.INPUT)
-      self.addGateAndPin(self.gate, 'B', Pin.INPUT)
-      self.addGateAndPin(self.gate, 'C', Pin.INPUT)
-      self.addGateAndPin(self.gate, 'D', Pin.INPUT)
+      self.addPin('A', Pin.INPUT)
+      self.addPin('B', Pin.INPUT)
+      self.addPin('C', Pin.INPUT)
+      self.addPin('D', Pin.INPUT)
       
-      self.addGateAndPin(self.gate, 'RCO', Pin.OUTPUT)
+      self.addPin('RCO', Pin.OUTPUT)
       
-      self.addGateAndPin(self.gate, 'CLK', Pin.INPUT)
-      self.addGateAndPin(self.gate, 'ENP', Pin.INPUT)
-      self.addGateAndPin(self.gate, 'ENT', Pin.INPUT)
+      self.addPin('CLK', Pin.INPUT)
+      self.addPin('ENP', Pin.INPUT)
+      self.addPin('ENT', Pin.INPUT)
       
    def updateImpl(self, gateName):
-      enable = self.getPinByGate(self.gate, 'ENP').getValue()
-      positiveEdge = self.getPinByGate(self.gate, 'CLK').isPositiveEdge()
-      negativeEdge = self.getPinByGate(self.gate, 'CLK').isNegativeEdge()
+      enable = self.getPin('ENP').getValue()
+      positiveEdge = self.getPin('CLK').isPositiveEdge()
+      negativeEdge = self.getPin('CLK').isNegativeEdge()
       
       if enable == 1 and positiveEdge:
          self.count = self.count + 1
@@ -89,11 +87,11 @@ class P74161(Part7400):
          self.count = 0
          
       bits = intToBits(self.count, 4)
-      self.getPinByGate(self.gate, 'QA').setValue(bits[3])
-      self.getPinByGate(self.gate, 'QB').setValue(bits[2])
-      self.getPinByGate(self.gate, 'QC').setValue(bits[1])
-      self.getPinByGate(self.gate, 'QD').setValue(bits[0])
-      self.getPinByGate(self.gate, 'RCO').setValue(self.rco)
+      self.getPin('QA').setValue(bits[3])
+      self.getPin('QB').setValue(bits[2])
+      self.getPin('QC').setValue(bits[1])
+      self.getPin('QD').setValue(bits[0])
+      self.getPin('RCO').setValue(self.rco)
       
       if self.count == 15:
          self.rco = 1
@@ -103,7 +101,7 @@ class P74161(Part7400):
       return False
       
    def getDAG(self, gate, name):
-      return set([self.getPinByGate(self.gate, name) for name in ['QA', 'QB', 'QC', 'QD', 'RCO']])
+      return set([self.getPin(name) for name in ['QA', 'QB', 'QC', 'QD', 'RCO']])
       
 class P74181(Part7400):
    matchingNames = ["74*181"]

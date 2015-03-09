@@ -27,5 +27,3 @@ def testMemory():
 if __name__ == '__main__':
    testALU()
    testMemory()
-
-#TODO: Clean up gates / default gates

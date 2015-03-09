@@ -9,12 +9,10 @@ class Header(Part):
       self.width = int(device[-1])
       
       if(self.width == 1):
-         self.gate = "G$1"
-         self.addGate(self.gate)
-         self.addGateAndPin(self.gate, '1', Pin.INPUT)
+         self.addDefaultGate("G$1")
+         self.addPin('1', Pin.INPUT)
       else:
-         self.gate = "A"
-         self.addGate(self.gate)
+         self.addDefaultGate("A")
          for i in range(self.width):
             self.addPin(str(i+1), Pin.INPUT)
       
@@ -23,7 +21,7 @@ class Header(Part):
       
    def setDirection(self, direction):
       self.direction = direction
-      for p in self.gates[self.gate].pins.values():
+      for p in self.gates[self.defaultGate].pins.values(): #TODO
          p.setDirection(direction)
          
    def setNumber(self, number):
@@ -31,10 +29,10 @@ class Header(Part):
       bits.reverse()
       
       for i in range(self.width):
-         self.getPinByGate(self.gate, str(i+1)).setValue(bits[i])
+         self.getPin(str(i+1)).setValue(bits[i])
 
    def getNumber(self):
-      bits = [self.getPinByGate(self.gate, str(i+1)).getValue() for i in range(self.width)]
+      bits = [self.getPin(str(i+1)).getValue() for i in range(self.width)]
       bits.reverse()
 
       return bitsToInt(*bits)

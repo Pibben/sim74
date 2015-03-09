@@ -136,6 +136,10 @@ class Part(object):
    def setDefaultGate(self, gate):
       self.defaultGate = gate
       
+   def addDefaultGate(self, name):
+      self.addGate(name)
+      self.setDefaultGate(name)
+      
    def getPinByGate(self, gate, name):
       return self.gates[gate].getPin(name)
       
