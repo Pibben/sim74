@@ -10,18 +10,20 @@ class Header(Part):
       
       if(self.width == 1):
          self.gate = "G$1"
+         self.addGate(self.gate)
          self.addGateAndPin(self.gate, '1', Pin.INPUT)
       else:
          self.gate = "A"
+         self.addGate(self.gate)
          for i in range(self.width):
             self.addPin(str(i+1), Pin.INPUT)
       
-   def updateImpl(self):
+   def updateImpl(self, gateName):
       return False
       
    def setDirection(self, direction):
       self.direction = direction
-      for p in self.pins.values():
+      for p in self.gates[self.gate].pins.values():
          p.setDirection(direction)
          
    def setNumber(self, number):

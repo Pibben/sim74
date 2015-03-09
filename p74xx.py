@@ -13,12 +13,12 @@ class P7404(Part7400):
       Part7400.__init__(self, name)
       
       for gate in ('A', 'B', 'C', 'D', 'E', 'F'):
+         self.addGate(gate)
          self.addGateAndPin(gate, 'I', Pin.INPUT)
          self.addGateAndPin(gate, 'O', Pin.OUTPUT)
       
-   def updateImpl(self):
-      for gate in ('A', 'B', 'C', 'D', 'E', 'F'):
-         self.getPinByGate(gate, 'O').setValue(1 - self.getPinByGate(gate, 'I').getValue())
+   def updateImpl(self, gateName):
+      self.getPinByGate(gateName, 'O').setValue(1 - self.getPinByGate(gateName, 'I').getValue())
       
       return True
    
@@ -32,15 +32,15 @@ class P7408(Part7400):
       Part7400.__init__(self, name)
       
       for gate in ('/1', '/2', '/3', '/4',):
+         self.addGate(gate)
          self.addGateAndPin(gate, 'A', Pin.INPUT)
          self.addGateAndPin(gate, 'B', Pin.INPUT)
          self.addGateAndPin(gate, 'Y', Pin.OUTPUT)
       
-   def updateImpl(self):
-      for gate in ('/1', '/2', '/3', '/4'):
-         a = bool(self.getPinByGate(gate, 'A').getValue())
-         b = bool(self.getPinByGate(gate, 'B').getValue())
-         self.getPinByGate(gate, 'Y').setValue(int(a & b))
+   def updateImpl(self, gateName):
+      a = bool(self.getPinByGate(gateName, 'A').getValue())
+      b = bool(self.getPinByGate(gateName, 'B').getValue())
+      self.getPinByGate(gateName, 'Y').setValue(int(a & b))
       
       return True
    
@@ -56,6 +56,8 @@ class P74161(Part7400):
       self.setDefaultGate('1')
       self.count = 0
       self.rco = 0
+      
+      self.addGate(self.gate)
       
       self.addGateAndPin(self.gate, 'QA', Pin.OUTPUT)
       self.addGateAndPin(self.gate, 'QB', Pin.OUTPUT)
@@ -73,7 +75,7 @@ class P74161(Part7400):
       self.addGateAndPin(self.gate, 'ENP', Pin.INPUT)
       self.addGateAndPin(self.gate, 'ENT', Pin.INPUT)
       
-   def updateImpl(self):
+   def updateImpl(self, gateName):
       enable = self.getPinByGate(self.gate, 'ENP').getValue()
       positiveEdge = self.getPinByGate(self.gate, 'CLK').isPositiveEdge()
       negativeEdge = self.getPinByGate(self.gate, 'CLK').isNegativeEdge()
@@ -98,8 +100,6 @@ class P74161(Part7400):
       else:
          self.rco = 0
       
-      self.getPinByGate(self.gate, 'CLK').resetEdge() #TODO
-      
       return False
       
    def getDAG(self, gate, name):
@@ -110,6 +110,8 @@ class P74181(Part7400):
    
    def __init__(self, name):
       Part7400.__init__(self, name)
+      
+      self.addGate('A')
 
       self.addPin('A0', Pin.INPUT)
       self.addPin('A1', Pin.INPUT)
@@ -138,7 +140,7 @@ class P74181(Part7400):
       self.addPin('G', Pin.OUTPUT)
       self.addPin('P', Pin.OUTPUT)
 
-   def updateImpl(self):
+   def updateImpl(self, gateName):
       a = bitsToInt(*[self.getPin(name).getValue() for name in ['A3', 'A2', 'A1', 'A0']])
       b = bitsToInt(*[self.getPin(name).getValue() for name in ['B3', 'B2', 'B1', 'B0']])
       s = bitsToInt(*[self.getPin(name).getValue() for name in ['S3', 'S2', 'S1', 'S0']])

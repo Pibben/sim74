@@ -42,7 +42,7 @@ class System(object):
          
       for s in order:
          if s.direction == Pin.OUTPUT and s.net:
-            s.part.update()
+            s.gate.update()
             
       for o in self.outputs:
          print("%s: %d" % (o.name, o.getNumber()))

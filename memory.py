@@ -14,6 +14,8 @@ class CY62256LL(Memory):
       
       self.gate = "G$1"
       
+      self.addGate(self.gate)
+      
       for i in range(15):
          self.addGateAndPin(self.gate, "A%d" % i, Pin.INPUT)
 
@@ -23,7 +25,7 @@ class CY62256LL(Memory):
    def getDAG(self, gate, name):
       return set([self.getPinByGate(self.gate, "DQ%d" % i) for i in range(8)])
    
-   def updateImpl(self):
+   def updateImpl(self, gateName):
       bits = [self.getPinByGate(self.gate, "A%d" % (14-i)).getValue() for i in range(15)]
       a = bitsToInt(*bits)
       

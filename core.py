@@ -78,14 +78,10 @@ class Pin(object):
 
    def isNegativeEdge(self):
       return self.negativeEdge
-   
-   def resetEdge(self):
-      self.positiveEdge = False
-      self.negativeEdge = False
       
    def setValue(self, value):
       if self.direction == Pin.INPUT:
-         self.part.setDirty()
+         self.gate.setDirty()
          self.positiveEdge = False
          self.negativeEdge = False
          if self.value == 0 and value == 1:
@@ -106,42 +102,58 @@ class Pin(object):
 
    def setNet(self, net):
       self.net = net
-
-class Part(object):
-   def __init__(self, name):
+      
+class Gate(object):
+   def __init__(self, part, name):
       self.name = name
       self.pins = {}
       self.dirty = True
+      self.part = part
+      
+   def getPin(self, name):
+      return self.pins[name]
+   
+   def addPin(self, name, direction):
+      self.pins.update({name: Pin(self.part, self, name, direction)})
+      
+   def update(self):
+      if self.dirty:
+         isDirty = self.part.updateImpl(self.name)
+         self.dirty = isDirty
+         
+   def setDirty(self):
+      self.dirty = True
+
+class Part(object):
+   def __init__(self, name):
       self.defaultGate = 'A'
+      self.gates = {}
+      self.name = name
+      
+   def addGate(self, name):
+      self.gates.update({name: Gate(self, name)})
       
    def setDefaultGate(self, gate):
       self.defaultGate = gate
       
    def getPinByGate(self, gate, name):
-      return self.pins[(gate, name)]
+      return self.gates[gate].getPin(name)
       
    def getPin(self, name):
       return self.getPinByGate(self.defaultGate, name)
    
    def addGateAndPin(self, gate, name, direction):
-      self.pins.update({(gate, name): Pin(self, gate, name, direction)})
+      self.gates[gate].addPin(name, direction)
       
    def addPin(self, name, direction):
       self.addGateAndPin(self.defaultGate, name, direction)
       
-   def update(self):
-      if self.dirty:
-         isDirty = self.updateImpl()
-         self.dirty = isDirty
-         
-   def setDirty(self):
-      self.dirty = True
-      
    def getDAGs(self):
       dags = {}
-      for p in self.pins.values():
-         if p.direction == Pin.INPUT:
-            dags.update({p: self.getDAG(p.gate, p.name)})
+      for g in self.gates.values():
+         for p in g.pins.values():
+            if p.direction == Pin.INPUT:
+               dags.update({p: self.getDAG(p.gate.name, p.name)})
       return dags
    
    def __repr__(self):
