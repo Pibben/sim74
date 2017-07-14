@@ -1,4 +1,4 @@
-from p74xx import P74181,P7404,P7408,P74161
+from p74xx import P74181,P7404,P7408,P74161,P74244,P74374
 from header import Header
 from memory import CY62256LL
 
@@ -13,6 +13,10 @@ class PartFactory(object):
          return P74161(name)
       if device in P74181.matchingNames:
          return P74181(name)
+      if device in P74244.matchingNames:
+         return P74244(name)
+      if device in P74374.matchingNames:
+         return P74374(name)
       if device in CY62256LL.matchingNames:
          return CY62256LL(name)
       if device in Header.matchingNames:

@@ -23,7 +23,9 @@ def parseXml(filename):
          for pinrefOrWire in segmentNode:
             if pinrefOrWire.tag == 'pinref':
                gate   = pinrefOrWire.attrib['gate']
+               #print(gate)
                pinstr = pinrefOrWire.attrib['pin']
+               #print(pinstr)
                pin = parts[pinrefOrWire.attrib['part']].getPinByGate(gate, pinstr)
                net.addPin(pin)
    

@@ -20,10 +20,22 @@ def testMemory():
    s.setHigh('V4', 'ENT')
    s.setHigh('V4', 'ENP')
    
-   for i in range(260):
+   for i in range(5):
       s.run(1)
       s.run(0)
+      
+def testCPU():
+   s = System('/home/per/eagle/cpu.sch')
+   
+   s.setInput('CLK')
+   s.setInput('R/W')
+   s.setOutput('OUT_F')
+   
+   for i in range(5):
+      s.run(1, 0)
+      s.run(0, 0)
    
 if __name__ == '__main__':
-   testALU()
-   testMemory()
+   #testALU()
+   #testMemory()
+   testCPU()

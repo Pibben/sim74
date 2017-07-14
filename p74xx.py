@@ -159,3 +159,90 @@ class P74181(Part7400):
       
    def getDAG(self, g, n):
       return set([self.getPin(name) for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']])
+   
+class P74244(Part7400):
+   matchingNames = ["74*244"]
+   
+   def __init__(self, name):
+      Part7400.__init__(self, name)
+      
+      self.outputEnabled = {'A': True, 'B': True}
+      
+      for gate in ('A', 'B'):
+         self.addGate(gate)
+         self.addGateAndPin(gate, 'G', Pin.INPUT)
+         
+         for i in range(1,4):
+            self.addGateAndPin(gate, "A%d" % i, Pin.INPUT)
+            self.addGateAndPin(gate, "Y%d" % i, Pin.OUTPUT)
+            
+   def updateImpl(self, gateName):
+      outputEnabled[gateName] = self.getPinByGate(gateName, 'G').getValue()
+      
+      if outputEnabled[gateName]:
+         for i in range(1,4):
+            self.getPinByGate(gateName, "Y%d" % i).setDirection(Pin.OUTPUT)
+      else:
+         for i in range(1,4):
+            self.getPinByGate(gateName, "Y%d" % i).setDirection(Pin.TRISTATE)
+
+      for i in range(1,4):
+         value = self.getPinByGate(gateName, "A%d" % i).getValue()
+         self.getPinByGate(gateName, "Y%d" % i).setValue(value)
+         
+   def getDAG(self, gate, name):
+      allOutputs = set([self.getPinByGate(gate, "Y%d" % i) for i in range(1,4)])
+      
+      if name == 'G':
+         return allOutputs
+      
+      return set()
+
+class P74374(Part7400):
+   matchingNames = ["74*374"]
+   
+   def __init__(self, name):
+      Part7400.__init__(self, name)
+      
+      self.outputEnabled = True
+      
+      self.addGate('A')
+      
+      self.addPin('CLK', Pin.INPUT)
+      self.addPin('OC', Pin.INPUT)
+      
+      for i in range(1,8):
+         self.addPin("D%d" % i, Pin.INPUT)
+         self.addPin("Q%d" % i, Pin.OUTPUT)
+         
+   def updateImpl(self, gateName):
+      positiveEdge = self.getPin('CLK').isPositiveEdge()
+      outputEnable = self.getPin('OC').getValue()
+      
+      if positiveEdge:
+         for i in range(1,8):
+            self.getPin("Q%d" % i).setValue(self.getPin("D%d" % i).getValue)
+            
+      if outputEnable:
+         self.outputEnabled = True
+         for i in range(1,8):
+            self.getPin("Q%d" % i).setDirection(Pin.OUTPUT)
+            
+      else:
+         self.outputEnabled = False
+         for i in range(1,8):
+            self.getPin("Q%d" % i).setDirection(Pin.TRISTATE)
+            
+      return False
+   
+   def getDAG(self, gate, name):
+      allOutputs = set([self.getPin("Q%d" % i) for i in range(1,8)])
+      
+      if gate == 'OC':
+         return allOutputs
+      
+      if gate == 'CLK' and self.outputEnabled:
+         return allOutputs
+      
+      return set()
+   
