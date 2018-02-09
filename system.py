@@ -1,12 +1,10 @@
-
-from parsexml import parseXml
 from toposort import toposort_flatten
 
 from core import Pin
 
 class System(object):
-   def __init__(self, filename):
-      self.parts, self.nets = parseXml(filename)
+   def __init__(self, parts, nets):
+      self.parts, self.nets = parts, nets
       
       self.inputs = []
       self.outputs = []
