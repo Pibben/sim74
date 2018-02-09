@@ -145,6 +145,9 @@ class Part(object):
       
    def getPin(self, name):
       return self.getPinByGate(self.defaultGate, name)
+
+   def getPins(self, names):
+      return (self.getPin(name) for name in names)
    
    def addGateAndPin(self, gate, name, direction):
       self.gates[gate].addPin(name, direction)

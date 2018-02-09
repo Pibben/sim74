@@ -102,7 +102,8 @@ class P74161(Part7400):
       
    def getDAG(self, gate, name):
       return set([self.getPin(name) for name in ['QA', 'QB', 'QC', 'QD', 'RCO']])
-      
+
+#https://github.com/MisterTea/MAMEHub/blob/master/Sources/Emulator/src/emu/machine/74181.c
 class P74181(Part7400):
    matchingNames = ["74*181"]
    
@@ -139,21 +140,38 @@ class P74181(Part7400):
       self.addPin('P', Pin.OUTPUT)
 
    def updateImpl(self, gateName):
-      a = bitsToInt(*[self.getPin(name).getValue() for name in ['A3', 'A2', 'A1', 'A0']])
-      b = bitsToInt(*[self.getPin(name).getValue() for name in ['B3', 'B2', 'B1', 'B0']])
-      s = bitsToInt(*[self.getPin(name).getValue() for name in ['S3', 'S2', 'S1', 'S0']])
-      c = self.getPin('CN').getValue()
-      m = self.getPin('M').getValue()
-      
-      f = a + b + c
-      
-      bits = intToBits(f, 5)
+      a3, a2, a1, a0 = (self.getPin(name).getValue() for name in ('A3', 'A2', 'A1', 'A0'))
+      b3, b2, b1, b0 = (self.getPin(name).getValue() for name in ('B3', 'B2', 'B1', 'B0'))
+      s3, s2, s1, s0 = (self.getPin(name).getValue() for name in ('S3', 'S2', 'S1', 'S0'))
 
-      self.getPin('F0').setValue(bits[4])
-      self.getPin('F1').setValue(bits[3])
-      self.getPin('F2').setValue(bits[2])
-      self.getPin('F3').setValue(bits[1])
-      self.getPin('CN+4').setValue(bits[0])
+      m_c = self.getPin('CN').getValue()
+      mp = not self.getPin('M').getValue()
+
+      ap0 = not (a0 or (b0 and s0) or (s1 and not b0))
+      bp0 = not (((not b0) and s2 and a0) or (a0 and b0 and s3))
+      ap1 = not (a1 or (b1 and s0) or (s1 and not b1))
+      bp1 = not (((not b1) and s2 and a1) or (a1 and b1 and s3))
+      ap2 = not (a2 or (b2 and s0) or (s1 and not b2))
+      bp2 = not (((not b2) and s2 and a2) or (a2 and b2 and s3))
+      ap3 = not (a3 or (b3 and s0) or (s1 and not b3))
+      bp3 = not (((not b3) and s2 and a3) or (a3 and b3 and s3))
+
+      fp0 = not (m_c and mp) != ((not ap0) and bp0)
+      fp1 = (not ((mp and ap0) or (mp and bp0 and m_c))) != ((not ap1) and bp1)
+      fp2 = (not ((mp and ap1) or (mp and ap0 and bp1) or (mp and m_c and bp0 and bp1))) != ((not ap2) and bp2)
+
+      fp3 = (not ((mp and ap2) or (mp and ap1 and bp2) or (mp and ap0 and bp1 and bp2) or (mp and m_c and bp0 and bp1 and bp2))) != ((not ap3) and bp3)
+      
+      m_equals = fp0 and fp1 and fp2 and fp3
+      m_p = not (bp0 and bp1 and bp2 and bp3)
+      m_g = not ((ap0 and bp1 and bp2 and bp3) or (ap1 and bp2 and bp3) or (ap2 and bp3) or ap3)
+      m_cn = (not (m_c and bp0 and bp1 and bp2 and bp3)) or m_g
+
+      self.getPin('F0').setValue(fp0)
+      self.getPin('F1').setValue(fp1)
+      self.getPin('F2').setValue(fp2)
+      self.getPin('F3').setValue(fp3)
+      self.getPin('CN+4').setValue(m_cn)
       
       return False
       
