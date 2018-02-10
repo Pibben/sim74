@@ -17,8 +17,8 @@ def intToBits(integer, num):
    return retval
 
 class BinaryBus:
-   def __init__(self, pins):
-      self.pins = list(pins)
+   def __init__(self, *pins):
+      self.pins = pins
 
    def setValue(self, value):
       for bit,pin in zip(intToBits(value, len(self.pins)), self.pins):
@@ -26,3 +26,8 @@ class BinaryBus:
 
    def getValue(self):
       return bitsToInt(*(pin.getValue() for pin in self.pins))
+
+   def connect(self, bus):
+      assert len(self.pins) == len(bus.pins)
+      for p1, p2 in zip(self.pins, bus.pins):
+         p1.connect(p2)

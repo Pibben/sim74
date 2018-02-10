@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch
 from unittest.mock import call
 from util import BinaryBus
+from core import Pin
 
 
 class TestBinaryBus(TestCase):
@@ -11,7 +12,7 @@ class TestBinaryBus(TestCase):
         a = Pin1()
         b = Pin2()
 
-        bus = BinaryBus([a, b])
+        bus = BinaryBus(a, b)
 
         bus.setValue(1)
         a.setValue.assert_called_with(0)
@@ -27,7 +28,7 @@ class TestBinaryBus(TestCase):
         a = Pin1()
         b = Pin2()
 
-        bus = BinaryBus([a, b])
+        bus = BinaryBus(a, b)
 
         a.getValue.return_value = 0
         b.getValue.return_value = 1
@@ -38,3 +39,20 @@ class TestBinaryBus(TestCase):
         b.getValue.return_value = 0
 
         self.assertEqual(bus.getValue(), 2)
+
+    def testConnect(self):
+        a = Pin()
+        b = Pin()
+        c = Pin()
+        d = Pin()
+
+        b1 = BinaryBus(a, b)
+        b2 = BinaryBus(c, d)
+        b1.connect(b2)
+
+        self.assertIsNotNone(a.net)
+        self.assertIsNotNone(b.net)
+        self.assertIsNotNone(c.net)
+        self.assertIsNotNone(d.net)
+        self.assertTrue(a.net is c.net)
+        self.assertTrue(b.net is d.net)

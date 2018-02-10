@@ -53,8 +53,8 @@ class Pin(object):
    INPUT = 0
    OUTPUT = 1
    TRISTATE = 2
-   
-   def __init__(self, part, gate, name, direction):
+
+   def __init__(self, part=None, gate=None, name='unnamed', direction=TRISTATE):
       self.direction = direction
       self.part = part
       self.value = 0
@@ -102,6 +102,15 @@ class Pin(object):
 
    def setNet(self, net):
       self.net = net
+
+   def connect(self, pin):
+      assert not self.net
+      if pin.net:
+         pin.net.addPin(self)
+      else:
+         new_net = Net("%s auto net" % self.name)
+         new_net.addPin(self)
+         new_net.addPin(pin)
       
 class Gate(object):
    def __init__(self, part, name):
