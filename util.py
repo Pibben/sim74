@@ -23,11 +23,16 @@ class BinaryBus:
    def setValue(self, value):
       for bit,pin in zip(intToBits(value, len(self.pins)), self.pins):
          pin.setValue(bit)
+         if pin.net:
+             pin.net.setValue(bit)
 
    def getValue(self):
       return bitsToInt(*(pin.getValue() for pin in self.pins))
 
    def connect(self, bus):
-      assert len(self.pins) == len(bus.pins)
-      for p1, p2 in zip(self.pins, bus.pins):
-         p1.connect(p2)
+      self.connectPins(bus.pins)
+
+   def connectPins(self, pins):
+       assert len(self.pins) == len(pins)
+       for p1, p2 in zip(self.pins, pins):
+           p1.connect(p2)

@@ -104,6 +104,7 @@ class P74161(Part7400):
       return set([self.getPin(name) for name in ['QA', 'QB', 'QC', 'QD', 'RCO']])
 
 #https://github.com/MisterTea/MAMEHub/blob/master/Sources/Emulator/src/emu/machine/74181.c
+#http://static.righto.com/chip/74181-viewer.js
 class P74181(Part7400):
    matchingNames = ["74*181"]
    
@@ -143,38 +144,64 @@ class P74181(Part7400):
       a3, a2, a1, a0 = (self.getPin(name).getValue() for name in ('A3', 'A2', 'A1', 'A0'))
       b3, b2, b1, b0 = (self.getPin(name).getValue() for name in ('B3', 'B2', 'B1', 'B0'))
       s3, s2, s1, s0 = (self.getPin(name).getValue() for name in ('S3', 'S2', 'S1', 'S0'))
+      #print(self.name)
+      #print(a3, a2, a1, a0)
+      #print(b3, b2, b1, b0)
 
       m_c = self.getPin('CN').getValue()
       mp = not self.getPin('M').getValue()
 
-      ap0 = not (a0 or (b0 and s0) or (s1 and not b0))
-      bp0 = not (((not b0) and s2 and a0) or (a0 and b0 and s3))
-      ap1 = not (a1 or (b1 and s0) or (s1 and not b1))
-      bp1 = not (((not b1) and s2 and a1) or (a1 and b1 and s3))
-      ap2 = not (a2 or (b2 and s0) or (s1 and not b2))
-      bp2 = not (((not b2) and s2 and a2) or (a2 and b2 and s3))
-      ap3 = not (a3 or (b3 and s0) or (s1 and not b3))
-      bp3 = not (((not b3) and s2 and a3) or (a3 and b3 and s3))
+      #print(m_c)
 
-      fp0 = not (m_c and mp) != ((not ap0) and bp0)
-      fp1 = (not ((mp and ap0) or (mp and bp0 and m_c))) != ((not ap1) and bp1)
-      fp2 = (not ((mp and ap1) or (mp and ap0 and bp1) or (mp and m_c and bp0 and bp1))) != ((not ap2) and bp2)
+      def make_p(a, b, s0, s1):
+          return not (a or (b and s0) or (s1 and not b))
 
-      fp3 = (not ((mp and ap2) or (mp and ap1 and bp2) or (mp and ap0 and bp1 and bp2) or (mp and m_c and bp0 and bp1 and bp2))) != ((not ap3) and bp3)
-      
+      def make_g(a, b, s2, s3):
+          return not (((not b) and s2 and a) or (a and b and s3))
+
+      p0 = make_p(a0, b0, s0, s1)
+      g0 = make_g(a0, b0, s2, s3)
+      p1 = make_p(a1, b1, s0, s1)
+      g1 = make_g(a1, b1, s2, s3)
+      p2 = make_p(a2, b2, s0, s1)
+      g2 = make_g(a2, b2, s2, s3)
+      p3 = make_p(a3, b3, s0, s1)
+      g3 = make_g(a3, b3, s2, s3)
+
+      #print([int(x) for x in (p0,g0,p1,g1,p2,g2,p3,g3)])
+
+      i0 = not (m_c and mp)
+      i1 = not p0 and g0
+      i2 = (not ((mp and p0) or (mp and g0 and m_c)))
+      i3 = not p1 and g1
+      i4 = (not ((mp and p1) or (mp and p0 and g1) or (mp and m_c and g0 and g1)))
+      i5 = not p2 and g2
+      i6 = (not ((mp and p2) or (mp and p1 and g2) or (mp and p0 and g1 and g2) or (mp and m_c and g0 and g1 and g2)))
+      i7 = not p3 and g3
+
+      fp0 = i0 != i1
+      fp1 = i2 != i3
+      fp2 = i4 != i5
+      fp3 = i6 != i7
+
       m_equals = fp0 and fp1 and fp2 and fp3
-      m_p = not (bp0 and bp1 and bp2 and bp3)
-      m_g = not ((ap0 and bp1 and bp2 and bp3) or (ap1 and bp2 and bp3) or (ap2 and bp3) or ap3)
-      m_cn = (not (m_c and bp0 and bp1 and bp2 and bp3)) or m_g
+      m_p = not (g0 and g1 and g2 and g3)
+
+      i8 = not (m_c and g0 and g1 and g2 and g3)
+
+      m_g = not ((p0 and g1 and g2 and g3) or (p1 and g2 and g3) or (p2 and g3) or p3)
+      m_cn = not i8 or not m_g
 
       self.getPin('F0').setValue(fp0)
       self.getPin('F1').setValue(fp1)
       self.getPin('F2').setValue(fp2)
       self.getPin('F3').setValue(fp3)
       self.getPin('CN+4').setValue(m_cn)
-      
+
+      #print(int(m_cn), int(fp3), int(fp2), int(fp1), int(fp0))
+
       return False
-      
+
    def getDAG(self, g, n):
       return set([self.getPin(name) for name in ['F0', 'F1', 'F2', 'F3', 'CN+4', 'A=B', 'G', 'P']])
    

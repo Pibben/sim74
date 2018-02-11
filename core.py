@@ -31,7 +31,7 @@ class Net(object):
       return count
    
    def setValue(self, value):
-      assert self.numOutputs() == 1
+      assert self.numOutputs() <= 1
       for p in self.terminals:
          if p.direction == Pin.INPUT:
             p.setValue(value)
@@ -156,7 +156,7 @@ class Part(object):
       return self.getPinByGate(self.defaultGate, name)
 
    def getPins(self, names):
-      return (self.getPin(name) for name in names)
+      return [self.getPin(name) for name in names]
    
    def addGateAndPin(self, gate, name, direction):
       self.gates[gate].addPin(name, direction)
