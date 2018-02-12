@@ -1,6 +1,59 @@
 from unittest import TestCase
-from p74xx import P74181
-from util import BinaryBus
+from p74xx import P74161, P74181
+from util import BinaryBus, SystemClock
+from system import System
+from core import Pin
+
+class TestP74161(TestCase):
+    def test_single(self):
+        part = P74161("test")
+        sys = System({"msb": part})
+
+        outbus = BinaryBus(*part.getPins(["QD", "QC", "QB", "QA"]))
+        enpin = part.getPin("ENP")
+        enpin.setInjectionEnabled()
+        clkpin = part.getPin("CLK")
+        clkpin.setInjectionEnabled()
+        rcopin = part.getPin("RCO")
+
+        enpin.setValue(1)
+
+        sc = SystemClock(clkpin, sys)
+
+        self.assertEqual(outbus.getValue(), 0)
+        sc.step()
+        self.assertEqual(outbus.getValue(), 1)
+        sc.run(14)
+        self.assertEqual(outbus.getValue(), 15)
+        self.assertEqual(rcopin.getValue(), 1)
+        sc.step()
+        self.assertEqual(outbus.getValue(), 0)
+        self.assertEqual(rcopin.getValue(), 0)
+
+    def tes_cascade(self):
+        lsb = P74161("lsb")
+        msb = P74161("msb")
+
+        outbus = BinaryBus(*(msb.getPins(["QD", "QC", "QB", "QA"]) + lsb.getPins(["QD", "QC", "QB", "QA"])))
+        enpin = lsb.getPin("ENP")
+        clkpin = msb.getPin("CLK")
+        clkpin.connect(lsb.getPin("CLK"))
+        rcopin = lsb.getPin("RCO")
+        rcopin.connect(msb.getPin("ENP"))
+
+        enpin.setValue(1)
+
+        c = Clock(clkpin)
+
+        self.assertEqual(outbus.getValue(), 0)
+        c.step()
+        self.assertEqual(outbus.getValue(), 1)
+        c.run(14)
+        self.assertEqual(outbus.getValue(), 15)
+        c.step()
+        self.assertEqual(outbus.getValue(), 16)
+
+
 
 #https://github.com/fdecaire/LogicLibrary/blob/master/TTLLibrary.Tests/TTL74181Tests.cs
 class TestP74181(TestCase):

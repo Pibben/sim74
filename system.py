@@ -3,8 +3,14 @@ from toposort import toposort_flatten
 from core import Pin
 
 class System(object):
-   def __init__(self, parts, nets):
-      self.parts, self.nets = parts, nets
+   def __init__(self, parts, nets=None):
+      self.parts = parts
+
+      if nets:
+         self.nets = nets
+      else:
+         setOfAllPins = sum((part.getAllPins() for part in parts.values()), [])
+         self.nets = list({p.net for p in setOfAllPins if p.net})
       
       self.inputs = []
       self.outputs = []
@@ -21,9 +27,7 @@ class System(object):
    def setHigh(self, partName, pinName):
       self.parts[partName].getPin(pinName).setDefaultValue(1)
    
-   def run(self, *args):
-      assert len(args) == len(self.inputs)
-      
+   def run(self):
       totalDAGs = {}
       
       for p in self.parts.values():
@@ -31,15 +35,12 @@ class System(object):
          
       for n in self.nets:
          totalDAGs.update(n.getDAG())
-         
-      order = toposort_flatten(totalDAGs)
+
+      order = toposort_flatten(totalDAGs, sort=False)
       order.reverse()
-      
-      for i in range(len(args)):
-         self.inputs[i].setNumber(args[i])
-         
+
       for s in order:
-         if s.direction == Pin.OUTPUT and s.net:
+         if (s.direction == Pin.OUTPUT and s.net) or s.injectionEnabled:
             s.gate.update()
             
       for o in self.outputs:

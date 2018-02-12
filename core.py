@@ -63,6 +63,10 @@ class Pin(object):
       self.name = name
       self.positiveEdge = False
       self.negativeEdge = False
+      self.injectionEnabled = False
+
+   def setInjectionEnabled(self):
+       self.injectionEnabled = True
       
    def setDefaultValue(self, value):
       self.value = value
@@ -98,7 +102,7 @@ class Pin(object):
       self.value = value
    
    def __repr__(self):
-      return "%s: %s-%s" % (self.part.name, self.gate, self.name)
+      return "%s: %s-%s" % (self.part.name, self.gate.name, self.name)
 
    def setNet(self, net):
       self.net = net
@@ -121,6 +125,9 @@ class Gate(object):
       
    def getPin(self, name):
       return self.pins[name]
+
+   def getAllPins(self):
+       return self.pins.values()
    
    def addPin(self, name, direction):
       self.pins.update({name: Pin(self.part, self, name, direction)})
@@ -157,6 +164,9 @@ class Part(object):
 
    def getPins(self, names):
       return [self.getPin(name) for name in names]
+
+   def getAllPins(self):
+       return sum([list(g.getAllPins()) for g in self.gates.values()], [])
    
    def addGateAndPin(self, gate, name, direction):
       self.gates[gate].addPin(name, direction)
