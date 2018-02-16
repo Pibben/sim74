@@ -40,7 +40,7 @@ class System(object):
       order.reverse()
 
       for s in order:
-         if (s.direction == Pin.OUTPUT and s.net) or s.injectionEnabled:
+         if (s.direction == Pin.OUTPUT) or s.injectionEnabled:
             s.gate.update()
             
       for o in self.outputs:

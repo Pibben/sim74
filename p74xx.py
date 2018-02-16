@@ -222,9 +222,9 @@ class P74244(Part7400):
             self.addGateAndPin(gate, "Y%d" % i, Pin.OUTPUT)
             
    def updateImpl(self, gateName):
-      outputEnabled[gateName] = self.getPinByGate(gateName, 'G').getValue()
+      self.outputEnabled[gateName] = self.getPinByGate(gateName, 'G').getValue()
       
-      if outputEnabled[gateName]:
+      if self.outputEnabled[gateName]:
          for i in range(1,4):
             self.getPinByGate(gateName, "Y%d" % i).setDirection(Pin.OUTPUT)
       else:

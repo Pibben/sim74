@@ -30,27 +30,30 @@ class TestP74161(TestCase):
         self.assertEqual(outbus.getValue(), 0)
         self.assertEqual(rcopin.getValue(), 0)
 
-    def tes_cascade(self):
+    def test_cascade(self):
         lsb = P74161("lsb")
         msb = P74161("msb")
+        sys = System({"lsb": lsb, "msb": msb})
 
         outbus = BinaryBus(*(msb.getPins(["QD", "QC", "QB", "QA"]) + lsb.getPins(["QD", "QC", "QB", "QA"])))
         enpin = lsb.getPin("ENP")
-        clkpin = msb.getPin("CLK")
+        clkpin = Pin(None, None, "clk", Pin.OUTPUT)
         clkpin.connect(lsb.getPin("CLK"))
+        #clkpin.connect(msb.getPin("CLK"))
+        msb.getPin("CLK").connect(clkpin)
         rcopin = lsb.getPin("RCO")
         rcopin.connect(msb.getPin("ENP"))
 
         enpin.setValue(1)
 
-        c = Clock(clkpin)
+        sc = SystemClock(clkpin, sys)
 
         self.assertEqual(outbus.getValue(), 0)
-        c.step()
+        sc.step()
         self.assertEqual(outbus.getValue(), 1)
-        c.run(14)
+        sc.run(14)
         self.assertEqual(outbus.getValue(), 15)
-        c.step()
+        sc.step()
         self.assertEqual(outbus.getValue(), 16)
 
 
