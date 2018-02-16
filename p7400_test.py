@@ -4,6 +4,7 @@ from util import BinaryBus, SystemClock
 from system import System
 from core import Pin
 
+
 class TestP74161(TestCase):
     def test_single(self):
         part = P74161("test")
@@ -39,7 +40,7 @@ class TestP74161(TestCase):
         enpin = lsb.getPin("ENP")
         clkpin = Pin(None, None, "clk", Pin.OUTPUT)
         clkpin.connect(lsb.getPin("CLK"))
-        #clkpin.connect(msb.getPin("CLK"))
+        # clkpin.connect(msb.getPin("CLK"))
         msb.getPin("CLK").connect(clkpin)
         rcopin = lsb.getPin("RCO")
         rcopin.connect(msb.getPin("ENP"))
@@ -57,8 +58,7 @@ class TestP74161(TestCase):
         self.assertEqual(outbus.getValue(), 16)
 
 
-
-#https://github.com/fdecaire/LogicLibrary/blob/master/TTLLibrary.Tests/TTL74181Tests.cs
+# https://github.com/fdecaire/LogicLibrary/blob/master/TTLLibrary.Tests/TTL74181Tests.cs
 class TestP74181(TestCase):
     def test_74181(self):
         part = P74181("test")
@@ -110,7 +110,6 @@ class TestP74181(TestCase):
         abus.setValue(5)
         bbus.setValue(2)
 
-
         part.updateImpl("foo")
 
         self.assertEqual(fbus.getValue(), 7)
@@ -146,7 +145,7 @@ class TestP74181(TestCase):
         mpin.setValue(0)
 
         lsb_alu.updateImpl("foo")
-        msb_alu.getPin("CN").setValue(lsb_alu.getPin("CN+4").getValue()) #TODO: Run DAG
+        msb_alu.getPin("CN").setValue(lsb_alu.getPin("CN+4").getValue())  # TODO: Run DAG
         msb_alu.updateImpl("foo")
 
         self.assertEqual(fbus.getValue(), 124)
