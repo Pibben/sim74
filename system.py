@@ -15,20 +15,6 @@ class System(object):
 
         assert self.nets
 
-        self.inputs = []
-        self.outputs = []
-
-    def set_output(self, pin_name):
-        self.parts[pin_name].set_direction(Pin.INPUT)
-        self.outputs.append(self.parts[pin_name])
-
-    def set_input(self, pin_name):
-        self.parts[pin_name].set_direction(Pin.OUTPUT)
-        self.inputs.append(self.parts[pin_name])
-
-    def set_high(self, part_name, pin_name):
-        self.parts[part_name].get_pin(pin_name).setDefaultValue(1)
-
     def run(self):
         total_dags = {}
 
@@ -45,8 +31,6 @@ class System(object):
             if s.direction == Pin.OUTPUT and s.gate:
                 s.gate.update()
 
-        for o in self.outputs:
-            print("%s: %d" % (o.name, o.get_number()))
 
     def sanity_check(self):
         for part in self.parts.values():
