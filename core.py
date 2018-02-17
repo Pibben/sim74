@@ -5,10 +5,19 @@ class Net(object):
     def __init__(self, name):
         self.terminals = []
         self.name = name
+        self.positiveEdge = False
+        self.negativeEdge = False
+        self.value = None
 
     def __repr__(self):
         pins = [str("%s" % k) for k in self.terminals]
         return "%s (%d/%d): %s" % (self.name, self.numInputs(), self.numOutputs(), pins)
+
+    def isPositiveEdge(self):
+        return self.positiveEdge
+
+    def isNegativeEdge(self):
+        return self.negativeEdge
 
     def addPin(self, pin):
         self.terminals.append(pin)
@@ -30,11 +39,23 @@ class Net(object):
 
         return count
 
+    def getValue(self):
+        return self.value
+
     def setValue(self, value):
         assert self.numOutputs() <= 1
+        self.positiveEdge = False
+        self.negativeEdge = False
+        if self.value == 0 and value == 1:
+            self.positiveEdge = True
+        elif self.value == 1 and value == 0:
+            self.negativeEdge = True
+
+        self.value = value
+
         for p in self.terminals:
             if p.direction == Pin.INPUT:
-                p.setValue(value)
+                p.setDirty()
         # print("Net %s has no input pins!" % self.name)
 
     def getDAG(self):
@@ -58,47 +79,32 @@ class Pin(object):
     def __init__(self, part=None, gate=None, name='unnamed', direction=TRISTATE):
         self.direction = direction
         self.part = part
-        self.value = 0
         self.net = None
         self.gate = gate
         self.name = name
-        self.positiveEdge = False
-        self.negativeEdge = False
-        self.injectionEnabled = False
-
-    def setInjectionEnabled(self):
-        self.injectionEnabled = True
-
-    def setDefaultValue(self, value):
-        self.value = value
 
     def setDirection(self, direction):
         self.direction = direction
 
     def getValue(self):
-        return self.value
+        assert self.direction == Pin.INPUT
+        return self.net.getValue()
 
     def isPositiveEdge(self):
-        return self.positiveEdge
+        return self.net.positiveEdge
 
     def isNegativeEdge(self):
-        return self.negativeEdge
+        return self.net.negativeEdge
+
+    def setDirty(self):
+        self.gate.setDirty()
 
     def setValue(self, value):
-        if self.direction == Pin.INPUT:
-            self.gate.setDirty()
-            self.positiveEdge = False
-            self.negativeEdge = False
-            if self.value == 0 and value == 1:
-                self.positiveEdge = True
-            elif self.value == 1 and value == 0:
-                self.negativeEdge = True
-
-        elif self.direction == Pin.OUTPUT:
+        if self.direction == Pin.OUTPUT:
             if (self.net):
                 self.net.setValue(value)
         else:
-            print("Set value on tristate pin")
+            print("Set value on input or tristate pin")
 
         self.value = value
 

@@ -13,6 +13,8 @@ class System(object):
             setOfAllPins = sum((part.getAllPins() for part in parts.values()), [])
             self.nets = list({p.net for p in setOfAllPins if p.net})
 
+        assert self.nets
+
         self.inputs = []
         self.outputs = []
 
@@ -40,7 +42,7 @@ class System(object):
         order.reverse()
 
         for s in order:
-            if (s.direction == Pin.OUTPUT) or s.injectionEnabled:
+            if (s.direction == Pin.OUTPUT and s.gate):
                 s.gate.update()
 
         for o in self.outputs:

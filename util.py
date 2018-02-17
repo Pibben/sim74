@@ -1,3 +1,6 @@
+from core import Net, Pin
+
+
 def bitsToInt(*bits):
     val = 0
     for bit in bits:
@@ -17,40 +20,64 @@ def intToBits(integer, num):
 
     return retval
 
-
-class BinaryBus:
-    def __init__(self, *pins):
-        self.pins = pins
+class Injector:
+    def __init__(self, pin):
+        assert pin.direction == Pin.INPUT
+        self.direction = Pin.OUTPUT
+        self.net = Net(pin.name)
+        self.net.addPin(pin)
+        self.net.addPin(self)
+        class Gate:
+            def update(self):
+                pass
+        self.gate = Gate()
 
     def setValue(self, value):
-        for bit, pin in zip(intToBits(value, len(self.pins)), self.pins):
-            pin.setValue(bit)
-            if pin.net:
-                pin.net.setValue(bit)
+        self.net.setValue(value)
 
-    def getValue(self):
-        return bitsToInt(*(pin.getValue() for pin in self.pins))
+    def setNet(self, net):
+        pass
 
-    def connect(self, bus):
-        self.connectPins(bus.pins)
+class BinaryProbe:
+    pass
+
+class Bus(object):
+    def __init__(self, names):
+        self.nets = [Net(name) for name in names]
 
     def connectPins(self, pins):
-        assert len(self.pins) == len(pins)
-        for p1, p2 in zip(self.pins, pins):
-            p1.connect(p2)
+        assert len(self.nets) == len(pins)
+        for n, p in zip(self.nets, pins):
+            n.addPin(p)
+
+    def connectPart(self, part):
+        d = {n.name: n for n in self.nets}
+        for name, net in d.items():
+            net.addPin(part.getPin(name))
+
+class BinaryBus(Bus):
+    def __init__(self, names):
+        super(BinaryBus, self).__init__(names)
+
+    def setValue(self, value):
+        for bit, net in zip(intToBits(value, len(self.nets)), self.nets):
+            net.setValue(bit)
+
+    def getValue(self):
+        return bitsToInt(*(net.getValue() for net in self.nets))
 
 
 class SystemClock:
-    def __init__(self, pin, system):
-        self.pin = pin
+    def __init__(self, net, system):
+        self.net = net
         self.system = system
 
     def step(self):
-        assert self.pin.getValue() == 0
+        #assert self.net.getValue() == 0
 
-        self.pin.setValue(1)
+        self.net.setValue(1)
         self.system.run()
-        self.pin.setValue(0)
+        self.net.setValue(0)
         self.system.run()
 
     def run(self, number):
