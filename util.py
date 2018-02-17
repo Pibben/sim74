@@ -1,7 +1,7 @@
 from core import Net, Pin
 
 
-def bitsToInt(*bits):
+def bits_to_int(*bits):
     val = 0
     for bit in bits:
         val = (val << 1) | bit
@@ -11,7 +11,7 @@ def bitsToInt(*bits):
     return val
 
 
-def intToBits(integer, num):
+def int_to_bits(integer, num):
     retval = []
     for i in range(num):
         retval.append((integer >> (num - i - 1)) & 1)
@@ -42,27 +42,27 @@ class Bus(object):
     def __init__(self, names):
         self.nets = [Net(name) for name in names]
 
-    def connectPins(self, pins):
+    def connect_pins(self, pins):
         assert len(self.nets) == len(pins)
         for n, p in zip(self.nets, pins):
-            n.addPin(p)
+            n.add_pin(p)
 
-    def connectPart(self, part):
+    def connect_part(self, part):
         d = {n.name: n for n in self.nets}
         for name, net in d.items():
-            net.addPin(part.getPin(name))
+            net.add_pin(part.get_pin(name))
 
 
 class BinaryBus(Bus):
     def __init__(self, names):
         super(BinaryBus, self).__init__(names)
 
-    def setValue(self, value):
-        for bit, net in zip(intToBits(value, len(self.nets)), self.nets):
-            net.setValue(bit)
+    def set_value(self, value):
+        for bit, net in zip(int_to_bits(value, len(self.nets)), self.nets):
+            net.set_value(bit)
 
-    def getValue(self):
-        return bitsToInt(*(net.getValue() for net in self.nets))
+    def get_value(self):
+        return bits_to_int(*(net.get_value() for net in self.nets))
 
 
 class BusInjector:
@@ -70,12 +70,12 @@ class BusInjector:
         self.nets = []
         for net in bus.nets:
             pin = Pin(direction=Pin.OUTPUT)
-            net.addPin(pin)
+            net.add_pin(pin)
             self.nets.append(net)
 
-    def setValue(self, value):
-        for bit, net in zip(intToBits(value, len(self.nets)), self.nets):
-            net.setValue(bit)
+    def set_value(self, value):
+        for bit, net in zip(int_to_bits(value, len(self.nets)), self.nets):
+            net.set_value(bit)
 
 
 class SystemClock:
@@ -86,9 +86,9 @@ class SystemClock:
     def step(self):
         # assert self.net.getValue() == 0
 
-        self.net.setValue(1)
+        self.net.set_value(1)
         self.system.run()
-        self.net.setValue(0)
+        self.net.set_value(0)
         self.system.run()
 
     def run(self, number):

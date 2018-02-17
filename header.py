@@ -1,45 +1,43 @@
 from core import Part, Pin
-from util import bitsToInt, intToBits
+from util import bits_to_int, int_to_bits
 
 
 class Header(Part):
-    matchingNames = ["PINHD-1X1", "PINHD-1X4", "PINHD-1X8"]
-
     def __init__(self, name, device):
         Part.__init__(self, name)
 
         self.width = int(device[-1])
 
         if self.width == 1:
-            self.addDefaultGate("G$1")
-            self.addPin('1', Pin.INPUT)
+            self.add_default_gate("G$1")
+            self.add_pin('1', Pin.INPUT)
         else:
-            self.addDefaultGate("A")
+            self.add_default_gate("A")
             for i in range(self.width):
-                self.addPin(str(i + 1), Pin.INPUT)
+                self.add_pin(str(i + 1), Pin.INPUT)
 
         self.direction = Pin.TRISTATE
 
-    def updateImpl(self, gateName):
+    def update_impl(self, gate_name):
         return False
 
-    def setDirection(self, direction):
+    def set_direction(self, direction):
         self.direction = direction
-        for p in self.gates[self.defaultGate].pins.values():  # TODO
-            p.setDirection(direction)
+        for p in self.gates[self.default_gate].pins.values():  # TODO
+            p.set_direction(direction)
 
-    def setNumber(self, number):
-        bits = intToBits(number, self.width)
+    def set_number(self, number):
+        bits = int_to_bits(number, self.width)
         bits.reverse()
 
         for i in range(self.width):
-            self.getPin(str(i + 1)).setValue(bits[i])
+            self.get_pin(str(i + 1)).set_value(bits[i])
 
-    def getNumber(self):
-        bits = [self.getPin(str(i + 1)).getValue() for i in range(self.width)]
+    def get_number(self):
+        bits = [self.get_pin(str(i + 1)).get_value() for i in range(self.width)]
         bits.reverse()
 
-        return bitsToInt(*bits)
+        return bits_to_int(*bits)
 
-    def getDAG(self, g, n):
+    def get_dag(self, g, n):
         return set()

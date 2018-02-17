@@ -5,34 +5,34 @@ from util import BinaryBus
 
 
 class TestBinaryBus(TestCase):
-    def testSetValue(self):
+    def test_set_value(self):
         a = Pin()
         b = Pin()
 
         bus = BinaryBus(('a', 'b'))
-        bus.connectPins((a, b))
+        bus.connect_pins((a, b))
 
-        bus.setValue(1)
+        bus.set_value(1)
         self.assertEqual(a.net.value, 0)
         self.assertEqual(b.net.value, 1)
 
-        bus.setValue(2)
+        bus.set_value(2)
         self.assertEqual(a.net.value, 1)
         self.assertEqual(b.net.value, 0)
 
-    def testGetValue(self):
+    def test_get_value(self):
         a = Pin()
         b = Pin()
 
         bus = BinaryBus(('a', 'b'))
-        bus.connectPins((a, b))
+        bus.connect_pins((a, b))
 
         a.net.value = 0
         b.net.value = 1
 
-        self.assertEqual(bus.getValue(), 1)
+        self.assertEqual(bus.get_value(), 1)
 
         a.net.value = 1
         b.net.value = 0
 
-        self.assertEqual(bus.getValue(), 2)
+        self.assertEqual(bus.get_value(), 2)

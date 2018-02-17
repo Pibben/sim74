@@ -10,35 +10,35 @@ class System(object):
         if nets:
             self.nets = nets
         else:
-            setOfAllPins = sum((part.getAllPins() for part in parts.values()), [])
-            self.nets = list({p.net for p in setOfAllPins if p.net})
+            set_of_all_pins = sum((part.get_all_pins() for part in parts.values()), [])
+            self.nets = list({p.net for p in set_of_all_pins if p.net})
 
         assert self.nets
 
         self.inputs = []
         self.outputs = []
 
-    def setOutput(self, pinName):
-        self.parts[pinName].setDirection(Pin.INPUT)
-        self.outputs.append(self.parts[pinName])
+    def set_output(self, pin_name):
+        self.parts[pin_name].set_direction(Pin.INPUT)
+        self.outputs.append(self.parts[pin_name])
 
-    def setInput(self, pinName):
-        self.parts[pinName].setDirection(Pin.OUTPUT)
-        self.inputs.append(self.parts[pinName])
+    def set_input(self, pin_name):
+        self.parts[pin_name].set_direction(Pin.OUTPUT)
+        self.inputs.append(self.parts[pin_name])
 
-    def setHigh(self, partName, pinName):
-        self.parts[partName].getPin(pinName).setDefaultValue(1)
+    def set_high(self, part_name, pin_name):
+        self.parts[part_name].get_pin(pin_name).setDefaultValue(1)
 
     def run(self):
-        totalDAGs = {}
+        total_dags = {}
 
         for p in self.parts.values():
-            totalDAGs.update(p.getDAGs())
+            total_dags.update(p.get_dags())
 
         for n in self.nets:
-            totalDAGs.update(n.getDAG())
+            total_dags.update(n.get_dag())
 
-        order = toposort_flatten(totalDAGs, sort=False)
+        order = toposort_flatten(total_dags, sort=False)
         order.reverse()
 
         for s in order:
@@ -46,7 +46,7 @@ class System(object):
                 s.gate.update()
 
         for o in self.outputs:
-            print("%s: %d" % (o.name, o.getNumber()))
+            print("%s: %d" % (o.name, o.get_number()))
 
     def sanity_check(self):
         for part in self.parts.values():
