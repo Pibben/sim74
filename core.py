@@ -154,7 +154,7 @@ class Gate(object):
             if pin.direction == Pin.INPUT:
                 if not pin.net:
                     print("Pin " + str(pin) + " is not connected.")
-                elif not pin.net.get_value():
+                elif pin.net.get_value() == None:
                     print("Net " + str(pin.net) + " have no value.")
 
 
