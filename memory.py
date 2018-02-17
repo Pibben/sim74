@@ -1,5 +1,5 @@
 from core import Part, Pin
-from util import *
+from util import bitsToInt, intToBits
 
 
 class Memory(Part):

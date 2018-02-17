@@ -1,4 +1,4 @@
-from util import *
+from util import intToBits
 
 from core import Part, Pin
 
@@ -80,7 +80,6 @@ class P74161(Part7400):
     def updateImpl(self, gateName):
         enable = self.getPin('ENP').getValue()
         positiveEdge = self.getPin('CLK').isPositiveEdge()
-        negativeEdge = self.getPin('CLK').isNegativeEdge()
 
         if enable == 1 and positiveEdge:
             self.count = self.count + 1
@@ -189,8 +188,8 @@ class P74181(Part7400):
         fp2 = i4 != i5
         fp3 = i6 != i7
 
-        m_equals = fp0 and fp1 and fp2 and fp3
-        m_p = not (g0 and g1 and g2 and g3)
+        # m_equals = fp0 and fp1 and fp2 and fp3
+        # m_p = not (g0 and g1 and g2 and g3)
 
         i8 = not (m_c and g0 and g1 and g2 and g3)
 

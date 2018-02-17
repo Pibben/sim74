@@ -1,8 +1,7 @@
 from unittest import TestCase
-from unittest.mock import patch
-from unittest.mock import call
+
+from core import Pin
 from util import BinaryBus
-from core import Pin, Net
 
 
 class TestBinaryBus(TestCase):

@@ -42,7 +42,7 @@ class System(object):
         order.reverse()
 
         for s in order:
-            if (s.direction == Pin.OUTPUT and s.gate):
+            if s.direction == Pin.OUTPUT and s.gate:
                 s.gate.update()
 
         for o in self.outputs:

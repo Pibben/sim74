@@ -1,6 +1,3 @@
-from util import *
-
-
 class Net(object):
     def __init__(self, name):
         self.terminals = []
@@ -103,12 +100,10 @@ class Pin(object):
 
     def setValue(self, value):
         if self.direction == Pin.OUTPUT:
-            if (self.net):
+            if self.net:
                 self.net.setValue(value)
         else:
             print("Set value on input or tristate pin")
-
-        self.value = value
 
     def __repr__(self):
         return "%s: %s-%s" % (self.part.name, self.gate.name, self.name)
@@ -158,8 +153,8 @@ class Gate(object):
         for pin in self.pins.values():
             if pin.direction == Pin.INPUT:
                 if not pin.net:
-                    print("Pin "+str(pin)+" is not connected.")
-                elif pin.net.getValue() == None:
+                    print("Pin " + str(pin) + " is not connected.")
+                elif not pin.net.getValue():
                     print("Net " + str(pin.net) + " have no value.")
 
 

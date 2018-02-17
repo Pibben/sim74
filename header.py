@@ -1,5 +1,5 @@
 from core import Part, Pin
-from util import *
+from util import bitsToInt, intToBits
 
 
 class Header(Part):
@@ -10,13 +10,15 @@ class Header(Part):
 
         self.width = int(device[-1])
 
-        if (self.width == 1):
+        if self.width == 1:
             self.addDefaultGate("G$1")
             self.addPin('1', Pin.INPUT)
         else:
             self.addDefaultGate("A")
             for i in range(self.width):
                 self.addPin(str(i + 1), Pin.INPUT)
+
+        self.direction = Pin.TRISTATE
 
     def updateImpl(self, gateName):
         return False

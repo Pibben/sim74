@@ -1,8 +1,9 @@
-from unittest import TestCase, skip
+from unittest import TestCase
+
+from core import Net
 from p74xx import P74161, P74181
-from util import BinaryBus, SystemClock, Injector, BusInjector
 from system import System
-from core import Pin, Net
+from util import BinaryBus, SystemClock, Injector, BusInjector
 
 
 class TestP74161(TestCase):
@@ -139,7 +140,7 @@ class TestP74181(TestCase):
         msb_alu = P74181("msb")
         lsb_alu = P74181("lsb")
 
-        abus = BinaryBus('A'+str(i) for i in range(8))
+        abus = BinaryBus('A' + str(i) for i in range(8))
         abus.connectPins(msb_alu.getPins(["A3", "A2", "A1", "A0"]) + lsb_alu.getPins(["A3", "A2", "A1", "A0"]))
         bbus = BinaryBus('B' + str(i) for i in range(8))
         bbus.connectPins(msb_alu.getPins(["B3", "B2", "B1", "B0"]) + lsb_alu.getPins(["B3", "B2", "B1", "B0"]))
