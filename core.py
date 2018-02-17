@@ -154,6 +154,14 @@ class Gate(object):
     def setDirty(self):
         self.dirty = True
 
+    def sanity_check(self):
+        for pin in self.pins.values():
+            if pin.direction == Pin.INPUT:
+                if not pin.net:
+                    print("Pin "+str(pin)+" is not connected.")
+                elif pin.net.getValue() == None:
+                    print("Net " + str(pin.net) + " have no value.")
+
 
 class Part(object):
     def __init__(self, name):
@@ -196,6 +204,10 @@ class Part(object):
                 if p.direction == Pin.INPUT:
                     dags.update({p: self.getDAG(p.gate.name, p.name)})
         return dags
+
+    def sanity_check(self):
+        for gate in self.gates.values():
+            gate.sanity_check()
 
     def __repr__(self):
         pins = [str("%s: %s" % (k, repr(v))) for k, v in self.pins.items()]

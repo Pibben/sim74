@@ -47,3 +47,7 @@ class System(object):
 
         for o in self.outputs:
             print("%s: %d" % (o.name, o.getNumber()))
+
+    def sanity_check(self):
+        for part in self.parts.values():
+            part.sanity_check()
