@@ -1,6 +1,6 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 from p74xx import P74161, P74181
-from util import BinaryBus, SystemClock, Injector
+from util import BinaryBus, SystemClock, Injector, BusInjector
 from system import System
 from core import Pin, Net
 
@@ -12,13 +12,13 @@ class TestP74161(TestCase):
         outbus = BinaryBus(("QD", "QC", "QB", "QA"))
         outbus.connectPart(part)
 
-        clk_inj = Injector(part.getPin("CLK"))
+        clk_inj = Injector([part.getPin("CLK")])
         clk_inj.setValue(0)
 
         rconet = Net("rco")
         rconet.addPin(part.getPin("RCO"))
 
-        enp_inj = Injector(part.getPin("ENP"))
+        enp_inj = Injector([part.getPin("ENP")])
         enp_inj.setValue(1)
 
         sys = System({"msb": part})
@@ -42,21 +42,17 @@ class TestP74161(TestCase):
         outbus = BinaryBus(("QH", "QG", "QF", "QE", "QD", "QC", "QB", "QA"))
         outbus.connectPins(msb.getPins(["QD", "QC", "QB", "QA"]) + lsb.getPins(["QD", "QC", "QB", "QA"]))
 
-        #TODO: Improve this
-        clknet = Net("clk")
-        clknet.addPin(msb.getPin("CLK"))
-        clknet.addPin(lsb.getPin("CLK"))
-        clknet.addPin(Pin(direction=Pin.OUTPUT))
-        clknet.setValue(0)
+        clk_inj = Injector([msb.getPin("CLK"), lsb.getPin("CLK")])
+        clk_inj.setValue(0)
 
         rcopin = lsb.getPin("RCO")
         rcopin.connect(msb.getPin("ENP"))
 
-        enp_inj = Injector(lsb.getPin("ENP"))
+        enp_inj = Injector([lsb.getPin("ENP")])
         enp_inj.setValue(1)
 
         sys = System({"lsb": lsb, "msb": msb})
-        sc = SystemClock(clknet, sys)
+        sc = SystemClock(clk_inj, sys)
         sys.run()
 
         self.assertEqual(outbus.getValue(), 0)
@@ -82,54 +78,58 @@ class TestP74181(TestCase):
         sbus = BinaryBus(("S3", "S2", "S1", "S0"))
         sbus.connectPart(part)
 
-        m_inj = Injector(part.getPin("M"))
-        cn_inj = Injector(part.getPin("CN"))
+        m_inj = Injector([part.getPin("M")])
+        cn_inj = Injector([part.getPin("CN")])
+
+        a_inj = BusInjector(abus)
+        b_inj = BusInjector(bbus)
+        s_inj = BusInjector(sbus)
 
         # F equals B
-        sbus.setValue(0b1010)
+        s_inj.setValue(0b1010)
         m_inj.setValue(1)
-        abus.setValue(0)
-        bbus.setValue(5)
+        a_inj.setValue(0)
+        b_inj.setValue(5)
         cn_inj.setValue(1)
 
         part.updateImpl("foo")
 
         self.assertEqual(fbus.getValue(), 5)
 
-        bbus.setValue(4)
+        b_inj.setValue(4)
 
         part.updateImpl("foo")
 
         self.assertEqual(fbus.getValue(), 4)
 
         # F equals A
-        sbus.setValue(0b1111)
+        s_inj.setValue(0b1111)
         m_inj.setValue(1)
-        abus.setValue(5)
-        bbus.setValue(0)
+        a_inj.setValue(5)
+        b_inj.setValue(0)
 
         part.updateImpl("foo")
 
         self.assertEqual(fbus.getValue(), 5)
 
-        abus.setValue(4)
+        a_inj.setValue(4)
 
         part.updateImpl("foo")
 
         self.assertEqual(fbus.getValue(), 4)
 
         # F = A + B
-        sbus.setValue(0b1001)
+        s_inj.setValue(0b1001)
         m_inj.setValue(0)
-        abus.setValue(5)
-        bbus.setValue(2)
+        a_inj.setValue(5)
+        b_inj.setValue(2)
 
         part.updateImpl("foo")
 
         self.assertEqual(fbus.getValue(), 7)
 
-        abus.setValue(4)
-        bbus.setValue(1)
+        a_inj.setValue(4)
+        b_inj.setValue(1)
 
         part.updateImpl("foo")
 
@@ -149,27 +149,24 @@ class TestP74181(TestCase):
         sbus.connectPins(msb_alu.getPins(["S3", "S2", "S1", "S0"]))
         sbus.connectPins(lsb_alu.getPins(["S3", "S2", "S1", "S0"]))
 
-        lsb_alu.getPin("CN").connect(msb_alu.getPin("CN+4"))
+        lsb_alu.getPin("CN+4").connect(msb_alu.getPin("CN"))
 
-        m_net = Net("M")
-        m_net.addPin(msb_alu.getPin("M"))
-        m_net.addPin(lsb_alu.getPin("M"))
-        cn_net = Net("CN")
-        cn_net.addPin(lsb_alu.getPin("CN"))
-        msb_cn_net = Net("CN")
-        msb_cn_net.addPin(msb_alu.getPin("CN"))
-        cn4_net = Net("CN+4")
-        cn4_net.addPin(lsb_alu.getPin("CN+4"))
+        a_inj = BusInjector(abus)
+        b_inj = BusInjector(bbus)
+        s_inj = BusInjector(sbus)
 
-        sbus.setValue(0b1001)
-        m_net.setValue(0)
-        abus.setValue(113)
-        bbus.setValue(11)
-        cn_net.setValue(1)
-        m_net.setValue(0)
+        m_inj = Injector([msb_alu.getPin("M"), lsb_alu.getPin("M")])
+        cn_inj = Injector([lsb_alu.getPin("CN")])
 
-        lsb_alu.updateImpl("foo")
-        msb_cn_net.setValue(cn4_net.getValue())  # TODO: Run DAG
-        msb_alu.updateImpl("foo")
+        s_inj.setValue(0b1001)
+        m_inj.setValue(0)
+        a_inj.setValue(113)
+        b_inj.setValue(11)
+        cn_inj.setValue(1)
+        m_inj.setValue(0)
+
+        sys = System({"lsb": lsb_alu, "msb": msb_alu})
+
+        sys.run()
 
         self.assertEqual(fbus.getValue(), 124)

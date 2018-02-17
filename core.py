@@ -11,7 +11,7 @@ class Net(object):
 
     def __repr__(self):
         pins = [str("%s" % k) for k in self.terminals]
-        return "%s (%d/%d): %s" % (self.name, self.numInputs(), self.numOutputs(), pins)
+        return "%s (%d/%d)[%s]: %s" % (self.name, self.numInputs(), self.numOutputs(), self.value, pins)
 
     def isPositiveEdge(self):
         return self.positiveEdge
@@ -61,6 +61,8 @@ class Net(object):
     def getDAG(self):
         dag = set()
         key = None
+        if not self.numOutputs() == 1:
+            print("Net " + str(self) + " have no outputs")
         assert self.numOutputs() == 1
         for p in self.terminals:
             if p.direction == Pin.OUTPUT:
@@ -115,6 +117,10 @@ class Pin(object):
         self.net = net
 
     def connect(self, pin):
+        assert not (self.net and pin.net), "Merging of nets not implemented"
+        if self.net:
+            pin.connect(self)
+            return
         assert not self.net
         if pin.net:
             pin.net.addPin(self)

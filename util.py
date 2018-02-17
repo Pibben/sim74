@@ -20,23 +20,17 @@ def intToBits(integer, num):
 
     return retval
 
-class Injector:
-    def __init__(self, pin):
-        assert pin.direction == Pin.INPUT
-        self.direction = Pin.OUTPUT
-        self.net = Net(pin.name)
-        self.net.addPin(pin)
-        self.net.addPin(self)
-        class Gate:
-            def update(self):
-                pass
-        self.gate = Gate()
+class Injector(Pin):
+    def __init__(self, pins, name=None):
 
-    def setValue(self, value):
-        self.net.setValue(value)
+        if not name:
+            name = pins[0].name
 
-    def setNet(self, net):
-        pass
+        super(Injector, self).__init__(name=name, direction=Pin.OUTPUT)
+
+        for pin in pins:
+            assert pin.direction == Pin.INPUT
+            pin.connect(self)
 
 class BinaryProbe:
     pass
@@ -66,6 +60,17 @@ class BinaryBus(Bus):
     def getValue(self):
         return bitsToInt(*(net.getValue() for net in self.nets))
 
+class BusInjector():
+    def __init__(self, bus):
+        self.nets = []
+        for net in bus.nets:
+            pin = Pin(direction=Pin.OUTPUT)
+            net.addPin(pin)
+            self.nets.append(net)
+
+    def setValue(self, value):
+        for bit, net in zip(intToBits(value, len(self.nets)), self.nets):
+            net.setValue(bit)
 
 class SystemClock:
     def __init__(self, net, system):
