@@ -60,6 +60,7 @@ class Net(object):
         key = None
         if not self.num_outputs() == 1:
             print("Net " + str(self) + " have no outputs")
+            return dict()
         assert self.num_outputs() == 1
         for p in self.terminals:
             if p.direction == Pin.OUTPUT:
@@ -96,6 +97,7 @@ class Pin(object):
         return self.net.negative_edge
 
     def set_dirty(self):
+        # print("Gate %s:%s set dirty by %s" % (self.part.name, self.gate.name, self.name))
         self.gate.set_dirty()
 
     def set_value(self, value):
@@ -103,12 +105,14 @@ class Pin(object):
             if self.net:
                 self.net.set_value(value)
         else:
-            print("Set value on input or tristate pin")
+            assert self.direction != Pin.INPUT
+            #print("Set value on input or tristate pin")
 
     def __repr__(self):
-        return "%s: %s-%s" % (self.part.name, self.gate.name, self.name)
+        return "%s: %s-%s" % (self.part.name if self.gate else None, self.gate.name if self.gate else None, self.name)
 
     def set_net(self, net):
+        assert not self.net or self.net == net
         self.net = net
 
     def connect(self, pin):
@@ -152,6 +156,7 @@ class Gate(object):
     def sanity_check(self):
         for pin in self.pins.values():
             if pin.direction == Pin.INPUT:
+                # noinspection PyComparisonWithNone,PyPep8
                 if not pin.net:
                     print("Pin " + str(pin) + " is not connected.")
                 elif pin.net.get_value() == None:

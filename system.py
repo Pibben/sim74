@@ -29,8 +29,9 @@ class System(object):
 
         for s in order:
             if s.direction == Pin.OUTPUT and s.gate:
+                # if s.gate.dirty:
+                    # print("Updating %s %s %s" % (s.part.name, s.gate.name, s.name))
                 s.gate.update()
-
 
     def sanity_check(self):
         for part in self.parts.values():

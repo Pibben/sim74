@@ -1,4 +1,4 @@
-from util import int_to_bits
+from util import int_to_bits, bits_to_int
 
 from core import Part, Pin
 
@@ -196,7 +196,7 @@ class P74181(Part7400):
         self.get_pin('F3').set_value(fp3)
         self.get_pin('CN+4').set_value(m_cn)
 
-        # print(int(m_cn), int(fp3), int(fp2), int(fp1), int(fp0))
+        # print(self.name, int(m_cn), int(fp3), int(fp2), int(fp1), int(fp0))
 
         return False
 
@@ -247,42 +247,60 @@ class P74374(Part7400):
 
         self.output_enabled = True
 
+        self.saved = [0 for _ in range(8)]
+
         self.add_gate('A')
 
         self.add_pin('CLK', Pin.INPUT)
         self.add_pin('OC', Pin.INPUT)
 
-        for i in range(1, 8):
+        for i in range(1, 9):
             self.add_pin("D%d" % i, Pin.INPUT)
-            self.add_pin("Q%d" % i, Pin.OUTPUT)
+            self.add_pin("Q%d" % i, Pin.TRISTATE)
+
+        for i in range(8):
+            self.add_pin("DUMMY%d" % i, Pin.OUTPUT)
+
+    def init(self):
+        for pin in self.get_all_pins():
+            if pin.direction == Pin.OUTPUT:
+                pin.set_value(0)
 
     def update_impl(self, gate_name):
         positive_edge = self.get_pin('CLK').is_positive_edge()
         output_enable = self.get_pin('OC').get_value()
 
-        if positive_edge:
-            for i in range(1, 8):
-                self.get_pin("Q%d" % i).set_value(self.get_pin("D%d" % i).get_value)
-
         if output_enable:
             self.output_enabled = True
-            for i in range(1, 8):
+            for i in range(1, 9):
                 self.get_pin("Q%d" % i).set_direction(Pin.OUTPUT)
 
         else:
             self.output_enabled = False
-            for i in range(1, 8):
+            for i in range(1, 9):
                 self.get_pin("Q%d" % i).set_direction(Pin.TRISTATE)
+
+        if positive_edge:
+            # print("saving " + str(list(int(self.get_pin("D%d" % i).get_value()) for i in range(1,9))))
+            for i in range(1, 9):
+                self.saved[i-1] = int(self.get_pin("D%d" % i).get_value())
+        else:
+            for i in range(1, 9):
+                # print("Outputting" + str(self.saved))
+                self.get_pin("Q%d" % i).set_value(self.saved[i - 1])
 
         return False
 
     def get_dag(self, gate, name):
-        all_outputs = set([self.get_pin("Q%d" % i) for i in range(1, 8)])
+        all_outputs = set([self.get_pin("Q%d" % i) for i in range(1, 9)])
 
-        if gate == 'OC':
+        if name == 'OC':
             return all_outputs
 
-        if gate == 'CLK' and self.output_enabled:
+        if name == 'CLK' and self.output_enabled:
             return all_outputs
 
-        return set()
+        return set([self.get_pin("DUMMY%d" % i) for i in range(8)])
+
+    def get_value(self):
+        return bits_to_int(*reversed(self.saved))

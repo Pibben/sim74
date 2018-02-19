@@ -86,6 +86,10 @@ class SystemClock:
     def step(self):
         # assert self.net.getValue() == 0
 
+        self.net.set_value(0)
+        self.system.run()
+        self.net.set_value(1)
+        self.system.run()
         self.net.set_value(1)
         self.system.run()
         self.net.set_value(0)
