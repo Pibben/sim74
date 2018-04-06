@@ -28,7 +28,10 @@ class InstructionDecoder(Part):
     def decode(self, mnemonic):
         table = {'add': [1, 0, 0, 1, 0],
                  'sbc': [0, 1, 1, 0, 0],
-                 'ld':  [0, 0, 0, 0, 0]}
+                 'ld':  [0, 0, 0, 0, 0],
+                 'xor': [0, 1, 1, 0, 1],
+                 'and': [1, 0, 1, 1, 1],
+                 'or':  [1, 1, 1, 0, 1]}
 
         operation, *operands = mnemonic.split()
 
@@ -103,14 +106,13 @@ class Cpu:
         self.instruction_decoder.get_pin("REG_A_OE").connect(self.reg_a.get_pin("OC"))
         self.instruction_decoder.get_pin("REG_B_OE").connect(self.reg_b.get_pin("OC"))
 
-        self.regbus_a = BinaryBus('Q' + str(i) for i in range(8, 0, -1))
-        self.regbus_a.connect_part(self.reg_a)
-        self.regbus_a.connect_pins(msb_alu.get_pins(["B3", "B2", "B1", "B0"]) +
-                                   lsb_alu.get_pins(["B3", "B2", "B1", "B0"]))
-        #self.regbus_b = BinaryBus('Q' + str(i) for i in range(8, 0, -1))
-        self.regbus_a.connect_part(self.reg_b)
-        self.regbus_a.connect_pins(msb_alu.get_pins(["B3", "B2", "B1", "B0"]) +
-                                   lsb_alu.get_pins(["B3", "B2", "B1", "B0"]))
+        self.alu_input_b_bus = BinaryBus('Q' + str(i) for i in range(8, 0, -1))
+        self.alu_input_b_bus.connect_part(self.reg_a)
+        self.alu_input_b_bus.connect_pins(msb_alu.get_pins(["B3", "B2", "B1", "B0"]) +
+                                          lsb_alu.get_pins(["B3", "B2", "B1", "B0"]))
+        self.alu_input_b_bus.connect_part(self.reg_b)
+        self.alu_input_b_bus.connect_pins(msb_alu.get_pins(["B3", "B2", "B1", "B0"]) +
+                                          lsb_alu.get_pins(["B3", "B2", "B1", "B0"]))
 
         self.reg_a.get_pin("CLK").connect(reg_clk_sel.get_pin_by_gate('/1', 'Y'))
         self.reg_b.get_pin("CLK").connect(reg_clk_sel.get_pin_by_gate('/2', 'Y'))
@@ -151,7 +153,7 @@ class Cpu:
         retval = {'a': self.reg_a.get_value(),
                   'b': self.reg_b.get_value()}
 
-        #print(retval)
+        print(retval)
 
         return retval
 
@@ -165,3 +167,7 @@ if __name__ == '__main__':
     assert cpu.run("sbc b 132 b") == {'b': 7, 'a': 124}   # b = 132 - b - 1
     assert cpu.run("add a 1 a") ==   {'b': 7, 'a': 125}
     assert cpu.run("sbc b 129 a") == {'b': 3, 'a': 125}
+    assert cpu.run("ld b 15 b") ==   {'a': 125, 'b': 15}
+    assert cpu.run("xor a 85 b") ==  {'a': 90, 'b': 15}
+    assert cpu.run("or a 16 b") ==   {'a': 31, 'b': 15}
+    assert cpu.run("and a 8 b") ==   {'a': 8, 'b': 15}
